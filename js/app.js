@@ -30,28 +30,20 @@ const APP = (() => {
 
   function init() {
     DB.initDemo();
-    if (!AUTH.checkSession()) { showLogin(); return; }
-    startApp();
+    if (AUTH.checkSession()) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      startApp();
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      setTimeout(() => document.getElementById('login-email')?.focus(), 100);
+    }
   }
 
   function showLogin() {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
-    document.getElementById('login-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const pass  = document.getElementById('login-password').value;
-      const err   = document.getElementById('login-error');
-      if (AUTH.login(email, pass)) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        startApp();
-      } else {
-        err.style.display = 'block';
-        err.textContent = 'Email ou mot de passe incorrect.';
-      }
-    });
-    setTimeout(() => document.getElementById('login-email')?.focus(), 100);
   }
 
   function startApp() {
