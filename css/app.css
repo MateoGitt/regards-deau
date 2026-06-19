@@ -93,30 +93,30 @@ body {
 .login-box {
   background: #fff;
   border-radius: var(--radius-lg);
-  padding: 40px;
+  padding: 36px 40px;
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
   box-shadow: var(--shadow-xl);
 }
 .login-logo {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 .login-logo-img {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
 }
 .login-logo-text h1 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--primary);
   letter-spacing: -.4px;
 }
 .login-logo-text p {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
