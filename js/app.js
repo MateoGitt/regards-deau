@@ -171,7 +171,7 @@ const APP = (() => {
     renders[pageId]?.call(renders[pageId] === DASH.render ? DASH : renders[pageId] === PLANNING.render ? PLANNING : renders[pageId] === FICHES.render ? FICHES : renders[pageId] === CLIENTS.render ? CLIENTS : renders[pageId] === CHANTIERS.render ? CHANTIERS : renders[pageId] === STOCK.render ? STOCK : renders[pageId] === STATS.render ? STATS : renders[pageId] === EQUIPE.render ? EQUIPE : SETTINGS);
   }
 
-  return { init, goPage, PAGES, ICONS };
+  return { init, startApp, goPage, PAGES, ICONS };
 })();
 
 window.APP = APP;
