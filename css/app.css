@@ -858,3 +858,129 @@ tbody tr:hover td { background: var(--gray-50); }
 .gap-2 { gap: 10px; }
 .w-full { width: 100%; }
 .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Login v2 ─────────────────────────────────────────────── */
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.login-logo-svg {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.login-brand {
+  display: flex;
+  flex-direction: column;
+}
+.login-tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.login-company {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -.5px;
+  line-height: 1.1;
+}
+.login-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+.input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-wrap svg:first-child {
+  position: absolute;
+  left: 11px;
+  width: 15px;
+  height: 15px;
+  stroke: var(--gray-400);
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  z-index: 1;
+}
+.input-icon-wrap .form-control {
+  padding-left: 36px;
+  padding-right: 40px;
+}
+.toggle-pwd {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+.toggle-pwd svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--gray-400);
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .15s;
+}
+.toggle-pwd:hover svg { stroke: var(--accent); }
+.btn-login {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 6px;
+  letter-spacing: .1px;
+}
+.btn-login:hover { background: var(--accent-hover); }
+.login-forgot {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  padding: 0;
+  transition: color .15s;
+}
+.login-forgot:hover { color: var(--accent-hover); text-decoration: underline; }
+.forgot-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.forgot-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.login-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-top: 24px;
+}

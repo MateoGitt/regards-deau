@@ -14,38 +14,66 @@
 </head>
 <body>
 
-<!-- ══ CONNEXION ══ -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">
-      <svg class="login-logo-img" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Logo + Nom société -->
+    <div class="login-header">
+      <svg class="login-logo-svg" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
         <circle cx="22" cy="22" r="20" fill="none" stroke="#9CA3AF" stroke-width="3.5"/>
-        <clipPath id="half"><rect x="2" y="22" width="40" height="20"/></clipPath>
-        <circle cx="22" cy="22" r="18" fill="#4BA3C3" clip-path="url(#half)"/>
+        <clipPath id="lhalf"><rect x="2" y="22" width="40" height="20"/></clipPath>
+        <circle cx="22" cy="22" r="18" fill="#4BA3C3" clip-path="url(#lhalf)"/>
       </svg>
-      <div class="login-logo-text">
-        <h1>Regards d'eau</h1>
-        <p>Gestion piscines &amp; spas</p>
+      <div class="login-brand">
+        <div class="login-tagline">Piscines &amp; Wellness</div>
+        <div class="login-company">Regards d'eau</div>
       </div>
     </div>
+
+    <div class="login-divider"></div>
+
     <div class="login-error" id="login-error"></div>
+
     <form id="login-form">
       <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-control" id="login-email" type="email" required placeholder="votre@email.com" autocomplete="email">
+        <label class="form-label">Adresse e-mail</label>
+        <div class="input-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input class="form-control" id="login-email" type="email" required placeholder="votre@email.com" autocomplete="email">
+        </div>
       </div>
+
       <div class="form-group">
-        <label class="form-label">Mot de passe</label>
-        <input class="form-control" id="login-password" type="password" required placeholder="••••••••" autocomplete="current-password">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <label class="form-label" style="margin-bottom:0">Mot de passe</label>
+          <button type="button" class="login-forgot" onclick="showForgot()">Mot de passe oublié ?</button>
+        </div>
+        <div class="input-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <input class="form-control" id="login-password" type="password" required placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="toggle-pwd" onclick="togglePwd()" tabindex="-1">
+            <svg id="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary w-full" style="justify-content:center;padding:10px;font-size:14px;margin-top:6px">Se connecter</button>
+
+      <button type="submit" class="btn-login">Se connecter</button>
     </form>
-    <div class="login-demo">
-      <strong>Comptes de démonstration</strong>
-      <div>patron@regards-eau.be &nbsp;/&nbsp; patron123</div>
-      <div>tech1@regards-eau.be &nbsp;/&nbsp; tech123</div>
-      <div>commercial@regards-eau.be &nbsp;/&nbsp; comm123</div>
+
+    <!-- Mot de passe oublié -->
+    <div id="forgot-panel" style="display:none">
+      <div class="login-divider"></div>
+      <div class="forgot-title">Mot de passe oublié</div>
+      <p class="forgot-desc">Saisissez votre e-mail — votre administrateur recevra une notification pour réinitialiser votre accès.</p>
+      <div class="form-group">
+        <label class="form-label">Votre adresse e-mail</label>
+        <input class="form-control" id="forgot-email" type="email" placeholder="votre@email.com">
+      </div>
+      <button class="btn-login" onclick="sendForgot()" style="background:var(--gray-700)">Envoyer la demande</button>
+      <button type="button" class="login-forgot" style="display:block;text-align:center;margin-top:12px;width:100%" onclick="hideForgot()">Retour à la connexion</button>
     </div>
+
+    <div class="login-footer">Regards d'eau &copy; 2026 &mdash; Accès sécurisé</div>
   </div>
 </div>
 
@@ -127,6 +155,36 @@ document.getElementById('sidebar-overlay').addEventListener('click', () => {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('open');
 });
+</script>
+<script>
+function togglePwd() {
+  const input = document.getElementById('login-password');
+  const icon = document.getElementById('eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+function showForgot() {
+  document.getElementById('forgot-panel').style.display = 'block';
+  document.getElementById('forgot-email').focus();
+}
+function hideForgot() {
+  document.getElementById('forgot-panel').style.display = 'none';
+}
+function sendForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return;
+  const settings = JSON.parse(localStorage.getItem('regards_settings') || '{}');
+  const adminEmail = settings.admin_email || 'admin@regards-eau.be';
+  const subject = encodeURIComponent('Demande réinitialisation mot de passe — Regards d'eau');
+  const body = encodeURIComponent('Bonjour,\n\nL'utilisateur ' + email + ' demande une réinitialisation de son mot de passe sur Regards d'eau.\n\nMerci de traiter cette demande.\n\nCordialement');
+  window.location.href = 'mailto:' + adminEmail + '?subject=' + subject + '&body=' + body;
+  setTimeout(hideForgot, 500);
+}
 </script>
 </body>
 </html>
