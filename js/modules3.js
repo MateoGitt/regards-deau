@@ -22,8 +22,8 @@ const STOCK = {
         <button class="btn btn-ghost btn-sm" onclick="STOCK.setView('products')">📦 Produits</button>
         <button class="btn btn-ghost btn-sm" onclick="STOCK.setView('locations')">🗂️ Emplacements</button>
         <button class="btn btn-ghost btn-sm" onclick="STOCK.setView('moves')">📋 Mouvements</button>
-        <button class="btn btn-ghost btn-sm" onclick="STOCK.openScanner()">📷 Scanner</button>
-        <button class="btn btn-primary btn-sm" onclick="STOCK.openNewProduct()">+ Produit</button>
+        <button class="btn btn-ghost btn-sm" onclick="STOCK.openScanner()"> Scanner</button>
+        <button class="btn btn-primary btn-sm" onclick="STOCK.openNewProduct()">Nouveau produit</button>
       </div>
     </div>
     <div class="kpi-grid" style="margin-bottom:20px">
@@ -92,8 +92,8 @@ const STOCK = {
         <td style="white-space:nowrap">
           <button class="btn btn-success btn-sm" onclick="STOCK.openMove('${p.id}','in')" title="Entrée">⬆️</button>
           <button class="btn btn-warning btn-sm" onclick="STOCK.openMove('${p.id}','out')" title="Sortie">⬇️</button>
-          <button class="btn btn-ghost btn-sm" onclick="U.printLabel(DB.getById('products','${p.id}'),DB.getById('locations','${p.location_id}'))" title="Étiquette">🏷️</button>
-          <button class="btn btn-ghost btn-sm" onclick="STOCK.openEditProduct('${p.id}')" title="Modifier">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="U.printLabel(DB.getById('products','${p.id}'),DB.getById('locations','${p.location_id}'))" title="Étiquette"></button>
+          <button class="btn btn-ghost btn-sm" onclick="STOCK.openEditProduct('${p.id}')" title="Modifier"></button>
         </td>
       </tr>`;
     }).join('') || '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted)">Aucun produit</td></tr>';
@@ -117,7 +117,7 @@ const STOCK = {
     document.getElementById('stock-view').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div style="font-weight:700">Carte des emplacements</div>
-      <button class="btn btn-primary btn-sm" onclick="STOCK.openNewLocation()">+ Emplacement</button>
+      <button class="btn btn-primary btn-sm" onclick="STOCK.openNewLocation()">Nouvel emplacement</button>
     </div>
     <div class="location-grid">
       ${locations.map(loc => {
@@ -153,7 +153,7 @@ const STOCK = {
               return `<tr>
                 <td>${U.fmtDate(m.date)}</td>
                 <td>${p?.name||m.product_id}</td>
-                <td>${m.type==='in'?'<span style="color:var(--success);font-weight:700">⬆️ Entrée</span>':'<span style="color:var(--warning);font-weight:700">⬇️ Sortie</span>'}</td>
+                <td>${m.type==='in'?'<span style="color:var(--success);font-weight:700">Entrée</span>':'<span style="color:var(--warning);font-weight:700">Sortie</span>'}</td>
                 <td><strong>${m.qty}</strong> ${p?.unit||''}</td>
                 <td>${m.reason||'—'}</td>
                 <td><code style="font-size:12px">${m.ref||'—'}</code></td>
@@ -169,7 +169,7 @@ const STOCK = {
   openMove(productId, type) {
     const p = DB.getById('products', productId);
     document.getElementById('modal-move').classList.add('open');
-    document.getElementById('modal-move-title').textContent = type === 'in' ? '⬆️ Entrée de stock' : '⬇️ Sortie de stock';
+    document.getElementById('modal-move-title').textContent = type === 'in' ? 'Entrée de stock' : 'Sortie de stock';
     document.getElementById('fm-product-id').value = productId;
     document.getElementById('fm-type').value = type;
     document.getElementById('fm-product-name').textContent = p?.name||'';
@@ -258,8 +258,8 @@ const STOCK = {
             <div style="color:var(--text-muted);font-size:13px">SKU: ${p.sku}</div>
             <div style="font-size:24px;font-weight:800;margin:8px 0;color:var(--success)">${p.qty} ${p.unit}</div>
             <div style="display:flex;gap:8px;margin-top:10px">
-              <button class="btn btn-success" onclick="STOCK.stopCamera();STOCK.openMove('${p.id}','in')">⬆️ Entrée</button>
-              <button class="btn btn-warning" onclick="STOCK.stopCamera();STOCK.openMove('${p.id}','out')">⬇️ Sortie</button>
+              <button class="btn btn-success" onclick="STOCK.stopCamera();STOCK.openMove('${p.id}','in')">Entrée</button>
+              <button class="btn btn-warning" onclick="STOCK.stopCamera();STOCK.openMove('${p.id}','out')">Sortie</button>
             </div>
           </div>
         </div>`;
@@ -373,7 +373,7 @@ const STOCK = {
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-move')">Annuler</button>
-          <button class="btn btn-primary" onclick="STOCK.saveMove()">✅ Confirmer</button>
+          <button class="btn btn-primary" onclick="STOCK.saveMove()"> Confirmer</button>
         </div>
       </div>
     </div>
@@ -382,7 +382,7 @@ const STOCK = {
     <div class="modal-overlay" id="modal-scanner">
       <div class="modal-box modal-sm">
         <div class="modal-header">
-          <div class="modal-title">📷 Scanner QR / Code-barres</div>
+          <div class="modal-title"> Scanner QR / Code-barres</div>
           <button class="modal-close" onclick="STOCK.stopCamera()">×</button>
         </div>
         <div class="modal-body">
@@ -465,7 +465,7 @@ const STOCK = {
         </form>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-product')">Annuler</button>
-          <button class="btn btn-primary" onclick="STOCK.saveProduct()">💾 Enregistrer</button>
+          <button class="btn btn-primary" onclick="STOCK.saveProduct()"> Enregistrer</button>
         </div>
       </div>
     </div>
@@ -489,7 +489,7 @@ const STOCK = {
         </form>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-location')">Annuler</button>
-          <button class="btn btn-primary" onclick="STOCK.saveLocation()">✅ Créer</button>
+          <button class="btn btn-primary" onclick="STOCK.saveLocation()"> Créer</button>
         </div>
       </div>
     </div>`;
@@ -542,7 +542,7 @@ const STATS = {
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">👷 Activité techniciens</div></div>
+        <div class="card-header"><div class="card-title"> Activité techniciens</div></div>
         <div class="card-body">
           ${techStats.map(t => `
             <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -599,7 +599,7 @@ const EQUIPE = {
               <td>${u.email}</td>
               <td>${U.stateBadge(u.role)}</td>
               <td>${u.active ? '<span style="color:var(--success);font-weight:700">● Actif</span>' : '<span style="color:var(--text-muted)">○ Inactif</span>'}</td>
-              <td><button class="btn btn-ghost btn-sm" onclick="EQUIPE.openEdit('${u.id}')">✏️</button></td>
+              <td><button class="btn btn-ghost btn-sm" onclick="EQUIPE.openEdit('${u.id}')"></button></td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -663,10 +663,10 @@ const EQUIPE = {
           <div class="form-group"><label class="form-label">Mot de passe *</label><input class="form-control" id="fu-password" required placeholder="Min. 6 caractères"></div>
           <div class="form-group"><label class="form-label">Rôle *</label>
             <select class="form-control" id="fu-role" required>
-              <option value="technicien">👷 Technicien</option>
-              <option value="commercial">💼 Commercial</option>
-              <option value="patron">👔 Patron</option>
-              <option value="admin">⚙️ Administrateur</option>
+              <option value="technicien"> Technicien</option>
+              <option value="commercial"> Commercial</option>
+              <option value="patron"> Patron</option>
+              <option value="admin"> Administrateur</option>
             </select>
           </div>
           <div class="form-group"><label class="form-label">Couleur</label><input class="form-control" id="fu-color" type="color"></div>
@@ -674,7 +674,7 @@ const EQUIPE = {
         </form>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-user')">Annuler</button>
-          <button class="btn btn-primary" onclick="EQUIPE.save()">💾 Enregistrer</button>
+          <button class="btn btn-primary" onclick="EQUIPE.save()"> Enregistrer</button>
         </div>
       </div>
     </div>`;
@@ -693,7 +693,7 @@ const SETTINGS = {
       <div class="card">
         <div class="card-header"><div class="card-title">🔥 Configuration Firebase</div></div>
         <div class="card-body">
-          ${DEMO_MODE ? '<div style="background:var(--warning)20;border:1px solid var(--warning)40;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--warning)">⚠️ Mode démo actif — Les données sont stockées localement uniquement</div>' : '<div style="background:var(--success)20;border:1px solid var(--success)40;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--success)">✅ Firebase connecté</div>'}
+          ${DEMO_MODE ? '<div style="background:var(--warning)20;border:1px solid var(--warning)40;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--warning)">Mode démo actif — Les données sont stockées localement uniquement</div>' : '<div style="background:var(--success)20;border:1px solid var(--success)40;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--success)"> Firebase connecté</div>'}
           <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Pour activer la synchronisation entre appareils, éditez le fichier <code>js/config.js</code> avec vos clés Firebase.</p>
           <div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;color:var(--text-muted)">
             apiKey: "${FIREBASE_CONFIG.apiKey}"<br>
@@ -707,16 +707,16 @@ const SETTINGS = {
           <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
             <div><div style="font-weight:600">Mode sombre</div><div style="font-size:12px;color:var(--text-muted)">Interface en mode nuit</div></div>
             <label style="cursor:pointer">
-              <input type="checkbox" id="dark-toggle" ${document.body.classList.contains('dark')?'checked':''} onchange="document.body.classList.toggle('dark',this.checked);localStorage.setItem('aquapro_dark',this.checked?'1':'0')">
+              <input type="checkbox" id="dark-toggle" ${document.body.classList.contains('dark')?'checked':''} onchange="document.body.classList.toggle('dark',this.checked);localStorage.setItem('regards-eau_dark',this.checked?'1':'0')">
             </label>
           </div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">💾 Données</div></div>
+        <div class="card-header"><div class="card-title"> Données</div></div>
         <div class="card-body">
-          <button class="btn btn-warning" onclick="SETTINGS.exportData()" style="width:100%;margin-bottom:10px">📥 Exporter toutes les données (JSON)</button>
-          <button class="btn btn-danger" onclick="SETTINGS.resetDemo()" style="width:100%">🔄 Réinitialiser les données démo</button>
+          <button class="btn btn-warning" onclick="SETTINGS.exportData()" style="width:100%;margin-bottom:10px"> Exporter toutes les données (JSON)</button>
+          <button class="btn btn-danger" onclick="SETTINGS.resetDemo()" style="width:100%"> Réinitialiser les données démo</button>
         </div>
       </div>
       <div class="card">
@@ -725,7 +725,7 @@ const SETTINGS = {
           <div class="form-group"><label class="form-label">Service ID</label><input class="form-control" id="ejs-service" value="${localStorage.getItem('ejs_service')||''}" placeholder="service_xxxxx"></div>
           <div class="form-group"><label class="form-label">Template ID</label><input class="form-control" id="ejs-template" value="${localStorage.getItem('ejs_template')||''}" placeholder="template_xxxxx"></div>
           <div class="form-group"><label class="form-label">Public Key</label><input class="form-control" id="ejs-key" value="${localStorage.getItem('ejs_key')||''}" placeholder="xxxxxxxxxxxxxxx"></div>
-          <button class="btn btn-primary" onclick="SETTINGS.saveEmailJS()" style="width:100%">💾 Sauvegarder</button>
+          <button class="btn btn-primary" onclick="SETTINGS.saveEmailJS()" style="width:100%"> Sauvegarder</button>
         </div>
       </div>
     </div>`;
@@ -739,14 +739,14 @@ const SETTINGS = {
     const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `aquapro_backup_${U.today()}.json`;
+    a.download = `regards-eau_backup_${U.today()}.json`;
     a.click();
     U.toast('Export téléchargé', 'success');
   },
 
   resetDemo() {
     if (!confirm('Réinitialiser toutes les données avec les données de démonstration ?')) return;
-    localStorage.removeItem('aquapro_initialized');
+    localStorage.removeItem('regards-eau_initialized');
     DB.initDemo();
     U.toast('Données réinitialisées', 'success');
     setTimeout(() => location.reload(), 1000);

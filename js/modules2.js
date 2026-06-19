@@ -27,7 +27,7 @@ const FICHES = {
           <option value="done">Validée</option>
           <option value="invoiced">Facturée</option>
         </select>
-        <button class="btn btn-primary" onclick="FICHES.openNew()">+ Nouvelle fiche</button>
+        <button class="btn btn-primary" onclick="FICHES.openNew()">Nouvelle fiche</button>
       </div>
     </div>
     <div id="fiches-list"></div>
@@ -63,7 +63,7 @@ const FICHES = {
                 <td>${U.fmtDate(f.date)}</td>
                 <td>${duration}</td>
                 <td>${U.stateBadge(f.state)}</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="FICHES.openEdit('${f.id}')">✏️ Ouvrir</button></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="FICHES.openEdit('${f.id}')"> Ouvrir</button></td>
               </tr>`;
             }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">Aucune fiche trouvée</td></tr>'}
           </tbody>
@@ -149,7 +149,7 @@ const FICHES = {
               <td>${l.qty}</td>
               <td>${U.fmtEur(l.price)}</td>
               <td>${U.fmtEur(l.qty*l.price)}</td>
-              <td><button class="btn btn-ghost btn-sm" onclick="FICHES.removeLine(${i})">🗑️</button></td>
+              <td><button class="btn btn-ghost btn-sm" onclick="FICHES.removeLine(${i})"></button></td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -234,10 +234,10 @@ const FICHES = {
         <div class="modal-body" style="padding:0">
           <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap">
             <select class="form-control" id="ff-type" style="width:180px" onchange="FICHES.updateChecklist()">
-              <option value="int">⚙️ Intervention</option>
-              <option value="mis">🔧 Mise en service</option>
-              <option value="hiv">❄️ Hivernage</option>
-              <option value="sav">🚨 SAV</option>
+              <option value="int">Intervention</option>
+              <option value="mis">Mise en service</option>
+              <option value="hiv">Hivernage</option>
+              <option value="sav">SAV</option>
             </select>
             <select class="form-control" id="ff-state" style="width:150px">
               <option value="draft">Brouillon</option>
@@ -289,7 +289,7 @@ const FICHES = {
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-fiche')">Annuler</button>
-          <button class="btn btn-primary" onclick="FICHES.save()">💾 Enregistrer</button>
+          <button class="btn btn-primary" onclick="FICHES.save()"> Enregistrer</button>
         </div>
       </div>
     </div>`;
@@ -324,14 +324,14 @@ const CHANTIERS = {
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ghost" id="btn-view-list" onclick="CHANTIERS.setView('list')">☰ Liste</button>
-        <button class="btn btn-primary" id="btn-view-pipeline" onclick="CHANTIERS.setView('pipeline')">📋 Pipeline</button>
-        <button class="btn btn-primary" onclick="CHANTIERS.openNew()">+ Nouveau chantier</button>
+        <button class="btn btn-primary" id="btn-view-pipeline" onclick="CHANTIERS.setView('pipeline')"> Pipeline</button>
+        <button class="btn btn-primary" onclick="CHANTIERS.openNew()">Nouveau chantier</button>
       </div>
     </div>
     <div class="kpi-grid" style="margin-bottom:20px">
-      <div class="kpi-card"><div class="kpi-icon">📝</div><div class="kpi-label">En devis</div><div class="kpi-value" style="color:var(--warning)">${U.fmtEur(totalDevis)}</div></div>
-      <div class="kpi-card"><div class="kpi-icon">🔨</div><div class="kpi-label">En cours</div><div class="kpi-value" style="color:var(--accent)">${U.fmtEur(totalEnCours)}</div></div>
-      <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-label">Facturé</div><div class="kpi-value" style="color:var(--success)">${U.fmtEur(totalFacture)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon"></div><div class="kpi-label">En devis</div><div class="kpi-value" style="color:var(--warning)">${U.fmtEur(totalDevis)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon"></div><div class="kpi-label">En cours</div><div class="kpi-value" style="color:var(--accent)">${U.fmtEur(totalEnCours)}</div></div>
+      <div class="kpi-card"><div class="kpi-icon"></div><div class="kpi-label">Facturé</div><div class="kpi-value" style="color:var(--success)">${U.fmtEur(totalFacture)}</div></div>
     </div>
     <div id="chantiers-view"></div>
     ${this.modalHtml()}`;
@@ -384,12 +384,12 @@ const CHANTIERS = {
               return `<tr>
                 <td><strong>${c.name}</strong></td>
                 <td>${client?.name||'—'}</td>
-                <td>${c.type==='construction'?'🏗️':'🔧'} ${c.type}</td>
+                <td>${c.type==='construction'?'':'🔧'} ${c.type}</td>
                 <td>${comm?.name||'—'}</td>
                 <td><strong>${U.fmtEur(c.amount_ht)}</strong></td>
                 <td>${U.fmtDate(c.date_end_planned)}</td>
                 <td>${U.stateBadge(c.state)}</td>
-                <td><button class="btn btn-ghost btn-sm" onclick="CHANTIERS.openEdit('${c.id}')">✏️</button></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="CHANTIERS.openEdit('${c.id}')"></button></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -476,10 +476,10 @@ const CHANTIERS = {
           <div class="form-row">
             <div class="form-group"><label class="form-label">Type</label>
               <select class="form-control" id="fch-type">
-                <option value="construction">🏗️ Construction</option>
-                <option value="renovation">🔨 Rénovation</option>
-                <option value="entretien">🔧 Entretien</option>
-                <option value="sav">🚨 SAV</option>
+                <option value="construction"> Construction</option>
+                <option value="renovation"> Rénovation</option>
+                <option value="entretien">Entretien</option>
+                <option value="sav">SAV</option>
               </select>
             </div>
             <div class="form-group"><label class="form-label">État</label>
@@ -500,7 +500,7 @@ const CHANTIERS = {
         </form>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="U.closeModal('modal-chantier')">Annuler</button>
-          <button class="btn btn-primary" onclick="CHANTIERS.save()">💾 Enregistrer</button>
+          <button class="btn btn-primary" onclick="CHANTIERS.save()"> Enregistrer</button>
         </div>
       </div>
     </div>`;

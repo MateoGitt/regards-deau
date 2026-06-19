@@ -7,11 +7,11 @@ const DB = (() => {
   // ── Données initiales démo ────────────────────────────────
   const DEMO_DATA = {
     users: [
-      { id: 'u1', name: 'Administrateur', email: 'admin@aquapro.be', password: 'admin123', role: 'admin', color: '#6366f1', active: true },
-      { id: 'u2', name: 'Marc Dumont', email: 'patron@aquapro.be', password: 'patron123', role: 'patron', color: '#0ea5e9', active: true },
-      { id: 'u3', name: 'Sophie Lambert', email: 'commercial@aquapro.be', password: 'comm123', role: 'commercial', color: '#f59e0b', active: true },
-      { id: 'u4', name: 'Thomas Renard', email: 'tech1@aquapro.be', password: 'tech123', role: 'technicien', color: '#10b981', active: true },
-      { id: 'u5', name: 'Kevin Pire', email: 'tech2@aquapro.be', password: 'tech123', role: 'technicien', color: '#ef4444', active: true },
+      { id: 'u1', name: 'Administrateur', email: 'admin@regards-eau.be', password: 'admin123', role: 'admin', color: '#6366f1', active: true },
+      { id: 'u2', name: 'Marc Dumont', email: 'patron@regards-eau.be', password: 'patron123', role: 'patron', color: '#0ea5e9', active: true },
+      { id: 'u3', name: 'Sophie Lambert', email: 'commercial@regards-eau.be', password: 'comm123', role: 'commercial', color: '#f59e0b', active: true },
+      { id: 'u4', name: 'Thomas Renard', email: 'tech1@regards-eau.be', password: 'tech123', role: 'technicien', color: '#10b981', active: true },
+      { id: 'u5', name: 'Kevin Pire', email: 'tech2@regards-eau.be', password: 'tech123', role: 'technicien', color: '#ef4444', active: true },
     ],
     clients: [
       { id: 'c1', name: 'Jean-Pierre Martin', phone: '0475 12 34 56', email: 'jp.martin@gmail.com', street: 'Rue des Lilas 12', zip: '4000', city: 'Liège', equipment_type: 'piscine', basin_type: 'liner', basin_volume: 45, pump_model: 'Hayward Super Pump 1.5cv', water_treatment: 'sel', other_equipment: 'Robot Zodiac CX30, volet immergé', technical_notes: 'Accès par portail latéral gauche. Code: 1234', created_at: '2024-01-15' },
@@ -55,19 +55,19 @@ const DB = (() => {
 
   // ── Initialisation démo ───────────────────────────────────
   function initDemo() {
-    if (!localStorage.getItem('aquapro_initialized')) {
+    if (!localStorage.getItem('regards-eau_initialized')) {
       Object.entries(DEMO_DATA).forEach(([key, val]) => {
-        localStorage.setItem(`aquapro_${key}`, JSON.stringify(val));
+        localStorage.setItem(`regards-eau_${key}`, JSON.stringify(val));
       });
-      localStorage.setItem('aquapro_initialized', '1');
-      console.log('[AquaPro] Données démo initialisées');
+      localStorage.setItem('regards-eau_initialized', '1');
+      console.log('[Regards d'eau] Données démo initialisées');
     }
   }
 
   // ── CRUD localStorage ─────────────────────────────────────
   function getAll(collection) {
     try {
-      return JSON.parse(localStorage.getItem(`aquapro_${collection}`)) || [];
+      return JSON.parse(localStorage.getItem(`regards-eau_${collection}`)) || [];
     } catch { return []; }
   }
 
@@ -80,13 +80,13 @@ const DB = (() => {
     const idx = all.findIndex(i => i.id === item.id);
     if (idx >= 0) all[idx] = item;
     else all.push(item);
-    localStorage.setItem(`aquapro_${collection}`, JSON.stringify(all));
+    localStorage.setItem(`regards-eau_${collection}`, JSON.stringify(all));
     return item;
   }
 
   function remove(collection, id) {
     const all = getAll(collection).filter(i => i.id !== id);
-    localStorage.setItem(`aquapro_${collection}`, JSON.stringify(all));
+    localStorage.setItem(`regards-eau_${collection}`, JSON.stringify(all));
   }
 
   function genId() {

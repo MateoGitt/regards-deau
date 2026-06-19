@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 const AUTH = (() => {
-  const SESSION_KEY = 'aquapro_session';
+  const SESSION_KEY = 'regards-eau_session';
 
   const ROLES = {
     admin:      { label: 'Administrateur', level: 4 },
@@ -32,18 +32,18 @@ const AUTH = (() => {
     const user = users.find(u => u.email === email && u.password === password && u.active);
     if (!user) return false;
     currentUser = user;
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
     return true;
   }
 
   function logout() {
     currentUser = null;
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
   }
 
   function checkSession() {
     try {
-      const data = sessionStorage.getItem(SESSION_KEY);
+      const data = localStorage.getItem(SESSION_KEY);
       if (data) {
         currentUser = JSON.parse(data);
         return true;

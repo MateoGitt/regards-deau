@@ -25,25 +25,25 @@ const DASH = {
     </div>
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-icon">📅</div>
+        <div class="kpi-icon"></div>
         <div class="kpi-label">Interventions aujourd'hui</div>
         <div class="kpi-value" style="color:var(--accent)">${fichesToday}</div>
         <div class="kpi-sub">planifiées</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">🏗️</div>
+        <div class="kpi-icon"></div>
         <div class="kpi-label">Chantiers en cours</div>
         <div class="kpi-value" style="color:var(--info)">${chantierEnCours}</div>
         <div class="kpi-sub">sur ${chantiers.length} total</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">👥</div>
+        <div class="kpi-icon"></div>
         <div class="kpi-label">Clients</div>
         <div class="kpi-value" style="color:var(--success)">${clients.length}</div>
         <div class="kpi-sub">dans la base</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">📦</div>
+        <div class="kpi-icon"></div>
         <div class="kpi-label">Alertes stock</div>
         <div class="kpi-value" style="color:${stockAlertes>0?'var(--danger)':'var(--success)'}">${stockAlertes}</div>
         <div class="kpi-sub">produits sous le seuil</div>
@@ -52,7 +52,7 @@ const DASH = {
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
       <div class="card">
-        <div class="card-header"><div class="card-title">📅 Planning du jour</div></div>
+        <div class="card-header"><div class="card-title"> Planning du jour</div></div>
         <div class="card-body" style="padding:0">
           ${planning.filter(p=>p.date===today).length ? planning.filter(p=>p.date===today).map(p => {
             const client = DB.getById('clients', p.client_id);
@@ -88,7 +88,7 @@ const DASH = {
     </div>
 
     <div class="card">
-      <div class="card-header"><div class="card-title">🏗️ Chantiers actifs</div></div>
+      <div class="card-header"><div class="card-title"> Chantiers actifs</div></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Chantier</th><th>Client</th><th>Type</th><th>État</th><th>Montant HT</th><th>Date prévue</th></tr></thead>
@@ -98,7 +98,7 @@ const DASH = {
               return `<tr style="cursor:pointer" onclick="APP.goPage('chantiers')">
                 <td><strong>${c.name}</strong></td>
                 <td>${client?.name||'—'}</td>
-                <td>${c.type==='construction'?'🏗️ Construction':'🔧 SAV'}</td>
+                <td>${c.type==='construction'?' Construction':' SAV'}</td>
                 <td>${U.stateBadge(c.state)}</td>
                 <td><strong>${U.fmtEur(c.amount_ht)}</strong></td>
                 <td>${U.fmtDate(c.date_end_planned)}</td>
@@ -129,7 +129,7 @@ const PLANNING = {
         <div class="page-subtitle">${isTech ? 'Ma journée' : 'Vue semaine équipe'}</div>
       </div>
       <div style="display:flex;gap:8px">
-        ${AUTH.isAtLeast('patron') ? `<button class="btn btn-primary" onclick="PLANNING.openNew()">+ Nouvelle tâche</button>` : ''}
+        ${AUTH.isAtLeast('patron') ? `<button class="btn btn-primary" onclick="PLANNING.openNew()">Nouvelle tâche</button>` : ''}
         ${!isTech ? `
         <button class="btn btn-ghost btn-icon" onclick="PLANNING.changeWeek(-1)">◀</button>
         <button class="btn btn-ghost" onclick="PLANNING.changeWeek(0)">Aujourd'hui</button>
@@ -214,7 +214,7 @@ const PLANNING = {
 
     if (!planning.length) {
       el.innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:40px">
-        <div style="font-size:48px">☀️</div>
+        <div style="font-size:48px"></div>
         <div style="font-size:18px;font-weight:700;margin-top:12px">Aucune tâche aujourd'hui</div>
         <div style="color:var(--text-muted);margin-top:6px">Bonne journée !</div>
       </div></div>`;
@@ -230,8 +230,8 @@ const PLANNING = {
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
             <div>
               <div style="font-size:18px;font-weight:800">${ev.title}</div>
-              <div style="font-size:14px;color:var(--text-muted);margin-top:4px">👤 ${client?.name||'—'}</div>
-              ${client?.street?`<div style="font-size:13px;color:var(--text-muted)">📍 ${client.street}, ${client.city}</div>`:''}
+              <div style="font-size:14px;color:var(--text-muted);margin-top:4px"> ${client?.name||'—'}</div>
+              ${client?.street?`<div style="font-size:13px;color:var(--text-muted)"> ${client.street}, ${client.city}</div>`:''}
             </div>
             <div style="text-align:right">
               <div style="font-size:20px;font-weight:800;color:var(--accent)">${U.fmtTime(ev.time_start||0)}</div>
@@ -244,8 +244,8 @@ const PLANNING = {
           </div>`:''}
           ${ev.notes?`<div style="margin-top:10px;font-size:13px;color:var(--text-muted)">📝 ${ev.notes}</div>`:''}
           <div style="margin-top:14px;display:flex;gap:8px">
-            <button class="btn btn-primary" onclick="FICHES.openNew('${client?.id||''}')">+ Créer une fiche</button>
-            ${client?.phone?`<a href="tel:${client.phone}" class="btn btn-ghost">📞 Appeler</a>`:''}
+            <button class="btn btn-primary" onclick="FICHES.openNew('${client?.id||''}')">Créer une fiche</button>
+            ${client?.phone?`<a href="tel:${client.phone}" class="btn btn-ghost"> Appeler</a>`:''}
           </div>
         </div>
       </div>`;
@@ -391,12 +391,12 @@ const CLIENTS = {
         <input class="form-control" id="client-search" placeholder="🔍 Rechercher..." style="width:220px" oninput="CLIENTS.filter=this.value;CLIENTS.renderList()">
         <select class="form-control" id="client-filter-type" style="width:150px" onchange="CLIENTS.renderList()">
           <option value="">Tous les types</option>
-          <option value="piscine">🏊 Piscine</option>
-          <option value="spa">🛁 Spa</option>
-          <option value="hammam">💨 Hammam</option>
-          <option value="sauna">🔥 Sauna</option>
+          <option value="piscine">Piscine</option>
+          <option value="spa"> Spa</option>
+          <option value="hammam"> Hammam</option>
+          <option value="sauna"> Sauna</option>
         </select>
-        <button class="btn btn-primary" onclick="CLIENTS.openNew()">+ Nouveau client</button>
+        <button class="btn btn-primary" onclick="CLIENTS.openNew()">Nouveau client</button>
       </div>
     </div>
     <div id="clients-list"></div>
@@ -428,7 +428,7 @@ const CLIENTS = {
                 <td><span class="badge" style="background:var(--accent)20;color:var(--accent)">${fiches.length}</span></td>
                 <td>
                   <button class="btn btn-ghost btn-sm" onclick="CLIENTS.openEdit('${c.id}')">✏️</button>
-                  <button class="btn btn-primary btn-sm" onclick="FICHES.openNew('${c.id}')">+ Fiche</button>
+                  <button class="btn btn-primary btn-sm" onclick="FICHES.openNew('${c.id}')">Fiche</button>
                 </td>
               </tr>`;
             }).join('') || '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Aucun client trouvé</td></tr>'}
@@ -517,11 +517,11 @@ const CLIENTS = {
               <div style="font-weight:700;margin-bottom:12px;color:var(--text-muted);font-size:12px;text-transform:uppercase">Équipement</div>
               <div class="form-group"><label class="form-label">Type équipement</label>
                 <select class="form-control" id="fc-equip">
-                  <option value="piscine">🏊 Piscine</option>
-                  <option value="spa">🛁 Spa / Jacuzzi</option>
-                  <option value="hammam">💨 Hammam</option>
-                  <option value="sauna">🔥 Sauna</option>
-                  <option value="multi">🔧 Multi-équipements</option>
+                  <option value="piscine">Piscine</option>
+                  <option value="spa"> Spa / Jacuzzi</option>
+                  <option value="hammam"> Hammam</option>
+                  <option value="sauna"> Sauna</option>
+                  <option value="multi"> Multi-équipements</option>
                 </select>
               </div>
               <div class="form-group"><label class="form-label">Type bassin</label>

@@ -1,4 +1,4 @@
-const CACHE = 'aquapro-v1';
+const CACHE = 'regards-eau-v1';
 const ASSETS = ['/', '/index.html', '/css/app.css', '/js/config.js', '/js/db.js', '/js/auth.js', '/js/utils.js', '/js/modules1.js', '/js/modules2.js', '/js/modules3.js', '/js/app.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
