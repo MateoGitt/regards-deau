@@ -923,6 +923,9 @@ async function sendFiche(){
     return;
   }
 
+  const confirmMsg = `Envoyer la fiche ${data.typeLabel} — ${data.client || 'client'} à ${settings.companyEmail} ?`;
+  if(!window.confirm(confirmMsg)) return;
+
   saveToHistory({client:data.client, type:data.type, date:data.date});
 
   const blob = doc.output('blob');
