@@ -199,6 +199,14 @@
 <main>
 
   <div id="homeScreen">
+    <div class="card" id="draftBanner" style="display:none; border-color:var(--amber); background:#FBF3E6; margin-bottom:16px;">
+      <h2 style="color:#B4791F;">Fiche en cours</h2>
+      <div id="draftBannerText" style="font-size:14px; margin:4px 0 12px 0;"></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="resumeDraft()">Reprendre</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="discardDraft()">Supprimer</button>
+      </div>
+    </div>
     <div class="home-title">
       <h2>Choisir une fiche</h2>
       <div class="home-sub">Sélectionne le type d'intervention à réaliser</div>
@@ -479,6 +487,11 @@ function renderTiles(){
 }
 
 function selectType(key){
+  const existingDraft = loadDraft();
+  if(existingDraft){
+    if(!window.confirm("Une fiche non terminée existe déjà. Démarrer une nouvelle fiche l'effacera. Continuer ?")) return;
+    clearDraft();
+  }
   state.type = key;
   resetForm();
   state.screen = 'form';
@@ -499,6 +512,7 @@ function goHome(){
   if(hasUnsavedData()){
     if(!window.confirm("Cette fiche n'est pas enregistrée. Revenir à l'accueil effacera les données saisies. Continuer ?")) return;
   }
+  clearDraft();
   resetForm();
   state.screen = 'home';
   showScreen();
@@ -518,6 +532,7 @@ function showScreen(){
     renderTechChips();
   } else {
     renderHistory();
+    renderDraftBanner();
   }
 }
 
@@ -553,13 +568,12 @@ function renderHivernageType(){
     const el = document.createElement('div');
     el.className = 'chip' + (state.hivernageType===opt ? ' on':'');
     el.textContent = opt;
-    el.onclick = ()=>{ state.hivernageType = (state.hivernageType===opt ? '' : opt); renderHivernageType(); };
+    el.onclick = ()=>{ state.hivernageType = (state.hivernageType===opt ? '' : opt); renderHivernageType(); saveDraft(); };
     wrap.appendChild(el);
   });
 }
 
-function toggleDevis(){
-  state.devisNeeded = !state.devisNeeded;
+function applyDevisUI(){
   const box = document.getElementById('devisBox');
   const span = document.getElementById('devisSpan');
   const detail = document.getElementById('devisDetailField');
@@ -569,6 +583,12 @@ function toggleDevis(){
   box.style.color = '#fff';
   span.style.color = state.devisNeeded ? 'var(--ink-soft)' : '';
   detail.style.display = state.devisNeeded ? 'block' : 'none';
+}
+
+function toggleDevis(){
+  state.devisNeeded = !state.devisNeeded;
+  applyDevisUI();
+  saveDraft();
 }
 
 /* ---------- Techs ---------- */
@@ -587,6 +607,7 @@ function renderTechChips(){
         state.selectedTechs.push(name);
       }
       renderTechChips();
+      saveDraft();
     };
     wrap.appendChild(el);
   });
@@ -606,6 +627,7 @@ function renderTasks(){
     el.onclick = ()=>{
       state.checkedTasks[i] = !state.checkedTasks[i];
       renderTasks();
+      saveDraft();
     };
     wrap.appendChild(el);
   });
@@ -620,23 +642,46 @@ function addMatRow(name='', qty=''){
   row.innerHTML = `
     <input type="text" placeholder="Désignation (ex: pastilles chlore)" value="${name}">
     <input type="text" placeholder="Qté" class="mono" value="${qty}">
-    <div class="rm-btn" onclick="this.parentElement.remove()">✕</div>`;
+    <div class="rm-btn" onclick="this.parentElement.remove(); saveDraft();">✕</div>`;
   wrap.appendChild(row);
 }
 
 /* ---------- Photos ---------- */
 
-function addPhotos(evt){
-  const files = Array.from(evt.target.files || []);
-  files.forEach(f=>{
-    const reader = new FileReader();
-    reader.onload = e=>{
-      state.photos.push(e.target.result);
-      renderPhotos();
+function compressImage(dataUrl, maxDim=1400, quality=0.72){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let { width, height } = img;
+      if(width > maxDim || height > maxDim){
+        if(width > height){ height = Math.round(height * maxDim/width); width = maxDim; }
+        else { width = Math.round(width * maxDim/height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      try{ resolve(canvas.toDataURL('image/jpeg', quality)); }
+      catch(e){ resolve(dataUrl); }
     };
-    reader.readAsDataURL(f);
+    img.onerror = ()=> resolve(dataUrl);
+    img.src = dataUrl;
   });
+}
+
+async function addPhotos(evt){
+  const files = Array.from(evt.target.files || []);
   evt.target.value = '';
+  for(const f of files){
+    const raw = await new Promise((resolve)=>{
+      const reader = new FileReader();
+      reader.onload = e=> resolve(e.target.result);
+      reader.readAsDataURL(f);
+    });
+    const compressed = await compressImage(raw);
+    state.photos.push(compressed);
+    renderPhotos();
+    saveDraft();
+  }
 }
 function renderPhotos(){
   const grid = document.getElementById('photoGrid');
@@ -648,17 +693,120 @@ function renderPhotos(){
     grid.insertBefore(t, grid.firstChild);
   });
 }
-function removePhoto(i){ state.photos.splice(i,1); renderPhotos(); }
+function removePhoto(i){ state.photos.splice(i,1); renderPhotos(); saveDraft(); }
+
+/* ---------- Brouillon (sauvegarde automatique) ---------- */
+
+const DRAFT_KEY = 'fiche_draft';
+let draftSaveTimer = null;
+
+function saveDraft(){
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(()=>{
+    if(state.screen !== 'form') return;
+    if(!hasUnsavedData()) return;
+    const data = gatherData();
+    data.savedAt = new Date().toISOString();
+    try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); }catch(e){}
+  }, 500);
+}
+
+function loadDraft(){
+  try{ return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); }
+  catch(e){ return null; }
+}
+
+function clearDraft(){
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+function renderDraftBanner(){
+  const draft = loadDraft();
+  const banner = document.getElementById('draftBanner');
+  if(!draft){ banner.style.display = 'none'; return; }
+  banner.style.display = 'block';
+  document.getElementById('draftBannerText').textContent =
+    `Fiche ${TYPE_LABELS[draft.type] || ''} — ${draft.client || 'client non renseigné'}, non terminée`;
+}
+
+function resumeDraft(){
+  const draft = loadDraft();
+  if(!draft) return;
+  state.type = draft.type;
+  state.checkedTasks = {};
+  (TASKS[draft.type] || []).forEach((t,i)=>{
+    const found = (draft.tasksDoneAll || []).find(x=>x.text===t);
+    if(found && found.checked) state.checkedTasks[i] = true;
+  });
+  state.selectedTechs = draft.techs || [];
+  state.photos = draft.photos || [];
+  state.hivernageType = draft.hivernageType || '';
+  state.devisNeeded = !!draft.devisNeeded;
+
+  state.screen = 'form';
+  showScreen();
+
+  document.getElementById('clientName').value = draft.client || '';
+  document.getElementById('clientStreet').value = draft.street || '';
+  document.getElementById('clientPostal').value = draft.postal || '';
+  document.getElementById('clientCity').value = draft.city || '';
+  document.getElementById('description').value = draft.description || '';
+  document.getElementById('devisDetail').value = draft.devisDetail || '';
+  document.getElementById('fDate').value = draft.date || new Date().toISOString().slice(0,10);
+  document.getElementById('fDurationInput').value = draft.durationRaw || '00:00';
+
+  document.getElementById('matList').innerHTML = '';
+  if(draft.materials && draft.materials.length){
+    draft.materials.forEach(m=> addMatRow(m.name, m.qty));
+  } else {
+    addMatRow();
+  }
+
+  renderPhotos();
+  renderTechChips();
+  renderHivernageType();
+  applyDevisUI();
+}
+
+function discardDraft(){
+  if(!window.confirm('Supprimer cette fiche non terminée ?')) return;
+  clearDraft();
+  renderDraftBanner();
+}
 
 /* ---------- History ---------- */
 
-function loadHistory(){ return JSON.parse(localStorage.getItem('fiche_history') || '[]'); }
-function saveToHistory(entry){
+const HISTORY_LIMIT = 25;
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem('fiche_history') || '[]'); }
+  catch(e){ return []; }
+}
+
+async function shrinkForHistory(photos){
+  const out = [];
+  for(const p of (photos || [])){
+    out.push(await compressImage(p, 900, 0.55));
+  }
+  return out;
+}
+
+async function saveToHistory(data){
+  const entry = Object.assign({}, data);
+  entry.photos = await shrinkForHistory(data.photos);
+  entry.savedAt = new Date().toISOString();
   const h = loadHistory();
   h.unshift(entry);
-  localStorage.setItem('fiche_history', JSON.stringify(h.slice(0,50)));
+  try{
+    localStorage.setItem('fiche_history', JSON.stringify(h.slice(0, HISTORY_LIMIT)));
+  }catch(e){
+    // storage full — drop photos from history entries and retry
+    const lean = h.slice(0, HISTORY_LIMIT).map(e2=>({...e2, photos:[]}));
+    try{ localStorage.setItem('fiche_history', JSON.stringify(lean)); }catch(e2){}
+  }
   renderHistory();
 }
+
 function renderHistory(){
   const h = loadHistory();
   const wrap = document.getElementById('histList');
@@ -667,10 +815,26 @@ function renderHistory(){
   h.forEach((item, i)=>{
     const el = document.createElement('div');
     el.className = 'hist-item';
-    el.innerHTML = `<div><div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type]}</div><div class="d">${item.date}</div></div><div class="del-hist" onclick="deleteHist(${i})">supprimer</div>`;
+    const canReview = !!item.tasksDoneAll;
+    el.innerHTML = `<div><div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type] || ''}</div><div class="d">${item.date || ''}</div></div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        ${canReview ? `<span class="add-link" style="margin-top:0;" onclick="reviewHistoryItem(${i})">revoir</span>` : ''}
+        <span class="del-hist" onclick="deleteHist(${i})">supprimer</span>
+      </div>`;
     wrap.appendChild(el);
   });
 }
+
+function reviewHistoryItem(i){
+  const h = loadHistory();
+  const item = h[i];
+  if(!item) return;
+  const doc = buildPDF(item);
+  const filename = `Fiche_${(item.typeLabel||'').replace(/\s/g,'')}_${(item.client||'').replace(/\s/g,'_')}_${item.date||''}.pdf`;
+  doc.save(filename);
+  showToast('PDF régénéré (photos en qualité réduite)');
+}
+
 function deleteHist(i){
   const h = loadHistory();
   h.splice(i,1);
@@ -707,6 +871,7 @@ function gatherData(){
     city: document.getElementById('clientCity').value.trim(),
     date: document.getElementById('fDate').value,
     duration: formatDuration(),
+    durationRaw: document.getElementById('fDurationInput').value,
     techs: state.selectedTechs.slice(),
     tasksDoneAll,
     description: document.getElementById('description').value.trim(),
@@ -891,19 +1056,20 @@ function buildPDF(data){
 }
 
 function backToHomeAfterSend(){
+  clearDraft();
   resetForm();
   state.screen = 'home';
   showScreen();
 }
 
-function generatePDF(silent){
+async function generatePDF(silent){
   const data = gatherData();
   if(!data.client){ showToast("Indique le nom du client avant de générer le PDF"); return null; }
   const doc = buildPDF(data);
   const filename = `Fiche_${data.typeLabel.replace(/\s/g,'')}_${data.client.replace(/\s/g,'_')}_${data.date||''}.pdf`;
   if(!silent){
     doc.save(filename);
-    saveToHistory({client:data.client, type:data.type, date:data.date});
+    await saveToHistory(data);
     showToast('PDF téléchargé');
     backToHomeAfterSend();
   }
@@ -913,7 +1079,7 @@ function generatePDF(silent){
 /* ---------- Send by email ---------- */
 
 async function sendFiche(){
-  const result = generatePDF(true);
+  const result = await generatePDF(true);
   if(!result) return;
   const { doc, filename, data } = result;
 
@@ -926,7 +1092,7 @@ async function sendFiche(){
   const confirmMsg = `Envoyer la fiche ${data.typeLabel} — ${data.client || 'client'} à ${settings.companyEmail} ?`;
   if(!window.confirm(confirmMsg)) return;
 
-  saveToHistory({client:data.client, type:data.type, date:data.date});
+  await saveToHistory(data);
 
   const blob = doc.output('blob');
   const file = new File([blob], filename, {type:'application/pdf'});
@@ -985,6 +1151,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
   renderPhotos();
   renderHistory();
   showScreen();
+
+  const formEl = document.getElementById('formScreen');
+  formEl.addEventListener('input', saveDraft);
+  formEl.addEventListener('change', saveDraft);
 });
 </script>
 </body>
