@@ -84,9 +84,17 @@
     background:var(--card); border:1px solid var(--line); border-radius:16px;
     padding:20px 14px; text-align:center; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:9px;
-    transition: transform .1s;
+    transition: transform .1s; position:relative;
   }
   .tile:active{transform:scale(.97); background:var(--aqua-light);}
+  .tile-disabled{cursor:default; opacity:.55; background:var(--paper);}
+  .tile-disabled:active{transform:none; background:var(--paper);}
+  .tile-disabled .tile-icon{background:var(--line);}
+  .tile-badge{
+    position:absolute; top:8px; right:8px; background:var(--ink-soft); color:#fff;
+    font-family:'Space Grotesk'; font-size:9.5px; font-weight:700; letter-spacing:.3px;
+    padding:3px 7px; border-radius:20px; text-transform:uppercase;
+  }
   .tile-icon{
     width:52px; height:52px; border-radius:14px; background:var(--aqua-light);
     display:flex; align-items:center; justify-content:center; font-size:24px;
@@ -276,19 +284,19 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="tasksCard">
     <h2 id="tasksTitle">Tâches effectuées</h2>
     <div class="task-list" id="taskList"></div>
   </div>
 
-  <div class="card">
-    <h2>Description de l'intervention</h2>
+  <div class="card" id="descriptionCard">
+    <h2>Descriptif de l'intervention</h2>
     <div class="field">
-      <textarea id="description" placeholder="Détails, observations, remarques pour le client ou le bureau..." style="min-height:110px;"></textarea>
+      <textarea id="description" placeholder="Détails, observations..." style="min-height:110px;"></textarea>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="materielCard">
     <h2>Matériel / produits utilisés</h2>
     <div id="matList"></div>
     <div class="add-link" onclick="addMatRow()">+ ajouter une ligne</div>
@@ -300,6 +308,13 @@
       <label class="photo-add">+
         <input type="file" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhotos(event)">
       </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Remarques</h2>
+    <div class="field">
+      <textarea id="remarks" placeholder="Remarque(s) pour le client ou le bureau..." style="min-height:80px;"></textarea>
     </div>
   </div>
 
@@ -394,26 +409,19 @@ const TASKS = {
     "Pose Flotteur",
     "Caution chlore/pH"
   ],
-  sav: [
-    "Diagnostic de la panne",
-    "Contrôle électrique (pompe, coffret, câblage)",
-    "Contrôle hydraulique (fuite, pression, vannes)",
-    "Remplacement de pièce(s)",
-    "Test de fonctionnement après réparation",
-    "Vérification absence de fuite",
-    "Nettoyage de la zone d'intervention",
-    "Conseils / consignes laissés au client"
-  ],
-  intervention: [
-    "Aspiration / brossage du bassin",
-    "Contrôle et équilibrage de l'eau",
-    "Contre-lavage du filtre",
-    "Vérification niveau des produits",
-    "Nettoyage skimmers et paniers",
-    "Nettoyage ligne d'eau",
-    "Contrôle des équipements (pompe, électrolyseur...)",
-    "Vérification du système de traitement"
-  ]
+  sav: [],
+  intervention: []
+};
+
+// Décrit la structure réelle de chaque fiche papier :
+// - checklist : liste de tâches à cocher (mise en service / hivernage)
+// - description : zone "Descriptif de l'intervention" libre (SAV / intervention)
+// - materiel : zone "Matériel / produits utilisés" (SAV / intervention)
+const TYPE_CONFIG = {
+  mise_en_service: { checklist: true,  description: true,  materiel: true  },
+  hivernage:        { checklist: true,  description: false, materiel: false },
+  sav:               { checklist: false, description: true,  materiel: true  },
+  intervention:       { checklist: false, description: true,  materiel: true  },
 };
 
 const TYPE_LABELS = {
@@ -491,14 +499,17 @@ function saveSettings(){
 
 /* ---------- Navigation home / fiche ---------- */
 
+const DISABLED_TYPES = ['mise_en_service'];
+
 function renderTiles(){
   const wrap = document.getElementById('tileGrid');
   wrap.innerHTML = '';
   Object.keys(TYPE_LABELS).forEach(key=>{
     const el = document.createElement('div');
-    el.className = 'tile';
-    el.innerHTML = `<div class="tile-icon">${TYPE_ICONS[key]}</div><div class="tile-label">${TYPE_LABELS[key]}</div>`;
-    el.onclick = ()=> selectType(key);
+    const isDisabled = DISABLED_TYPES.includes(key);
+    el.className = 'tile' + (isDisabled ? ' tile-disabled' : '');
+    el.innerHTML = `<div class="tile-icon">${TYPE_ICONS[key]}</div><div class="tile-label">${TYPE_LABELS[key]}</div>${isDisabled ? '<div class="tile-badge">Bientôt</div>' : ''}`;
+    if(!isDisabled) el.onclick = ()=> selectType(key);
     wrap.appendChild(el);
   });
 }
@@ -517,9 +528,10 @@ function hasUnsavedData(){
   const street = document.getElementById('clientStreet').value.trim();
   const city = document.getElementById('clientCity').value.trim();
   const desc = document.getElementById('description').value.trim();
+  const remarks = document.getElementById('remarks').value.trim();
   const anyTask = Object.values(state.checkedTasks).some(Boolean);
   const anyMat = Array.from(document.querySelectorAll('.mat-row input')).some(i=>i.value.trim());
-  return !!(client || street || city || desc || anyTask || anyMat || state.selectedTechs.length || state.photos.length);
+  return !!(client || street || city || desc || remarks || anyTask || anyMat || state.selectedTechs.length || state.photos.length);
 }
 
 function goHome(){
@@ -544,10 +556,18 @@ function showScreen(){
     renderTasks();
     renderHivernageType();
     renderTechChips();
+    applyTypeVisibility();
   } else {
     renderHistory();
     renderDraftBanner();
   }
+}
+
+function applyTypeVisibility(){
+  const cfg = TYPE_CONFIG[state.type] || {};
+  document.getElementById('tasksCard').style.display = cfg.checklist ? 'block' : 'none';
+  document.getElementById('descriptionCard').style.display = cfg.description ? 'block' : 'none';
+  document.getElementById('materielCard').style.display = cfg.materiel ? 'block' : 'none';
 }
 
 function resetForm(){
@@ -558,6 +578,7 @@ function resetForm(){
   document.getElementById('clientPostal').value = '';
   document.getElementById('clientCity').value = '';
   document.getElementById('description').value = '';
+  document.getElementById('remarks').value = '';
   document.getElementById('devisDetail').value = '';
   document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
   document.getElementById('fDurationInput').value = '00:00';
@@ -797,6 +818,7 @@ function populateFormFrom(data, draftId, historyId){
   document.getElementById('clientPostal').value = data.postal || '';
   document.getElementById('clientCity').value = data.city || '';
   document.getElementById('description').value = data.description || '';
+  document.getElementById('remarks').value = data.remarks || '';
   document.getElementById('devisDetail').value = data.devisDetail || '';
   document.getElementById('fDate').value = data.date || new Date().toISOString().slice(0,10);
   document.getElementById('fDurationInput').value = data.durationRaw || '00:00';
@@ -991,6 +1013,7 @@ function gatherData(){
     description: document.getElementById('description').value.trim(),
     materials: mats,
     photos: state.photos.slice(),
+    remarks: document.getElementById('remarks').value.trim(),
     hivernageType: state.hivernageType,
     devisNeeded: state.devisNeeded,
     devisDetail: document.getElementById('devisDetail').value.trim(),
@@ -1104,19 +1127,25 @@ function buildPDF(data){
     line('Type d\'hivernage : ' + data.hivernageType);
   }
 
-  checkPage();
-  section('Tâches effectuées');
-  if(data.tasksDoneAll.length===0){
-    line('Aucune tâche pour ce type de fiche.');
-  } else {
-    data.tasksDoneAll.forEach(t=> taskLine(t.text, t.checked));
+  const cfg = TYPE_CONFIG[data.type] || {};
+
+  if(cfg.checklist){
+    checkPage();
+    section('Tâches effectuées');
+    if(data.tasksDoneAll.length===0){
+      line('Aucune tâche pour ce type de fiche.');
+    } else {
+      data.tasksDoneAll.forEach(t=> taskLine(t.text, t.checked));
+    }
   }
 
-  checkPage();
-  section('Description');
-  line(data.description || '—');
+  if(cfg.description){
+    checkPage();
+    section('Descriptif de l\'intervention');
+    line(data.description || '—');
+  }
 
-  if(data.materials.length){
+  if(cfg.materiel && data.materials.length){
     checkPage();
     section('Matériel / produits utilisés');
     data.materials.forEach(m=>{ checkPage(10); line('•  ' + m.name + (m.qty ? '   (' + m.qty + ')' : '')); });
@@ -1139,6 +1168,12 @@ function buildPDF(data){
       if(col === 4){ col = 0; x = margin; y += thumb + gap; }
     });
     if(col !== 0){ y += thumb + gap; }
+  }
+
+  if(data.remarks){
+    checkPage();
+    section('Remarques');
+    line(data.remarks);
   }
 
   if(data.devisNeeded){
