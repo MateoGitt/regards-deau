@@ -729,35 +729,33 @@ function renderDraftBanner(){
     `Fiche ${TYPE_LABELS[draft.type] || ''} — ${draft.client || 'client non renseigné'}, non terminée`;
 }
 
-function resumeDraft(){
-  const draft = loadDraft();
-  if(!draft) return;
-  state.type = draft.type;
+function populateFormFrom(data){
+  state.type = data.type;
   state.checkedTasks = {};
-  (TASKS[draft.type] || []).forEach((t,i)=>{
-    const found = (draft.tasksDoneAll || []).find(x=>x.text===t);
+  (TASKS[data.type] || []).forEach((t,i)=>{
+    const found = (data.tasksDoneAll || []).find(x=>x.text===t);
     if(found && found.checked) state.checkedTasks[i] = true;
   });
-  state.selectedTechs = draft.techs || [];
-  state.photos = draft.photos || [];
-  state.hivernageType = draft.hivernageType || '';
-  state.devisNeeded = !!draft.devisNeeded;
+  state.selectedTechs = data.techs || [];
+  state.photos = data.photos || [];
+  state.hivernageType = data.hivernageType || '';
+  state.devisNeeded = !!data.devisNeeded;
 
   state.screen = 'form';
   showScreen();
 
-  document.getElementById('clientName').value = draft.client || '';
-  document.getElementById('clientStreet').value = draft.street || '';
-  document.getElementById('clientPostal').value = draft.postal || '';
-  document.getElementById('clientCity').value = draft.city || '';
-  document.getElementById('description').value = draft.description || '';
-  document.getElementById('devisDetail').value = draft.devisDetail || '';
-  document.getElementById('fDate').value = draft.date || new Date().toISOString().slice(0,10);
-  document.getElementById('fDurationInput').value = draft.durationRaw || '00:00';
+  document.getElementById('clientName').value = data.client || '';
+  document.getElementById('clientStreet').value = data.street || '';
+  document.getElementById('clientPostal').value = data.postal || '';
+  document.getElementById('clientCity').value = data.city || '';
+  document.getElementById('description').value = data.description || '';
+  document.getElementById('devisDetail').value = data.devisDetail || '';
+  document.getElementById('fDate').value = data.date || new Date().toISOString().slice(0,10);
+  document.getElementById('fDurationInput').value = data.durationRaw || '00:00';
 
   document.getElementById('matList').innerHTML = '';
-  if(draft.materials && draft.materials.length){
-    draft.materials.forEach(m=> addMatRow(m.name, m.qty));
+  if(data.materials && data.materials.length){
+    data.materials.forEach(m=> addMatRow(m.name, m.qty));
   } else {
     addMatRow();
   }
@@ -766,6 +764,13 @@ function resumeDraft(){
   renderTechChips();
   renderHivernageType();
   applyDevisUI();
+  saveDraft();
+}
+
+function resumeDraft(){
+  const draft = loadDraft();
+  if(!draft) return;
+  populateFormFrom(draft);
 }
 
 function discardDraft(){
@@ -777,6 +782,7 @@ function discardDraft(){
 /* ---------- History ---------- */
 
 const HISTORY_LIMIT = 25;
+
 
 function loadHistory(){
   try{ return JSON.parse(localStorage.getItem('fiche_history') || '[]'); }
@@ -818,7 +824,7 @@ function renderHistory(){
     const canReview = !!item.tasksDoneAll;
     el.innerHTML = `<div><div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type] || ''}</div><div class="d">${item.date || ''}</div></div>
       <div style="display:flex; gap:12px; align-items:center;">
-        ${canReview ? `<span class="add-link" style="margin-top:0;" onclick="reviewHistoryItem(${i})">revoir</span>` : ''}
+        ${canReview ? `<span class="add-link" style="margin-top:0;" onclick="reviewHistoryItem(${i})">ouvrir</span>` : ''}
         <span class="del-hist" onclick="deleteHist(${i})">supprimer</span>
       </div>`;
     wrap.appendChild(el);
@@ -829,10 +835,12 @@ function reviewHistoryItem(i){
   const h = loadHistory();
   const item = h[i];
   if(!item) return;
-  const doc = buildPDF(item);
-  const filename = `Fiche_${(item.typeLabel||'').replace(/\s/g,'')}_${(item.client||'').replace(/\s/g,'_')}_${item.date||''}.pdf`;
-  doc.save(filename);
-  showToast('PDF régénéré (photos en qualité réduite)');
+  const existingDraft = loadDraft();
+  if(existingDraft){
+    if(!window.confirm("Une fiche non terminée existe déjà. La rouvrir depuis l'historique l'effacera. Continuer ?")) return;
+  }
+  populateFormFrom(item);
+  showToast('Fiche rouverte — les photos sont en qualité réduite');
 }
 
 function deleteHist(i){
