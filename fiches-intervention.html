@@ -156,7 +156,13 @@
   .modal-bg{position:fixed; inset:0; background:rgba(10,30,32,.45); z-index:50; display:none; align-items:flex-end; justify-content:center;}
   .modal-bg.show{display:flex;}
   .modal{background:#fff; width:100%; max-width:720px; border-radius:18px 18px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom)) 18px; max-height:85vh; overflow:auto;}
-  .modal h3{font-size:16px; margin-bottom:14px;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .modal-head h3{margin-bottom:0;}
+  .modal-close{
+    width:30px; height:30px; border-radius:50%; background:var(--paper); color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;
+  }
+  .modal h3{font-size:16px;}
   .tech-edit-row{display:flex; gap:8px; margin-bottom:8px;}
   .close-modal{width:100%; margin-top:10px; padding:13px; border-radius:11px; background:var(--teal); color:#fff; border:none; font-weight:600; font-family:'Space Grotesk';}
 
@@ -298,9 +304,12 @@
   <button class="btn btn-primary" onclick="sendFiche()">✉️ Envoyer par mail</button>
 </div>
 
-<div class="modal-bg" id="settingsModal">
+<div class="modal-bg" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal">
-    <h3>Réglages</h3>
+    <div class="modal-head">
+      <h3>Réglages</h3>
+      <div class="modal-close" onclick="closeSettings()">✕</div>
+    </div>
     <div class="field">
       <label>Nom de la société</label>
       <input type="text" id="setCompanyName" placeholder="Regards d'eau">
@@ -427,6 +436,9 @@ function refreshHeader(){
   document.getElementById('companySubHead').textContent = "piscines & wellness";
 }
 
+function closeSettings(){
+  document.getElementById('settingsModal').classList.remove('show');
+}
 function openSettings(){
   document.getElementById('setCompanyName').value = settings.companyName || "";
   document.getElementById('setCompanyEmail').value = settings.companyEmail || "";
