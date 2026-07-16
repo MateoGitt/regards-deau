@@ -111,47 +111,49 @@
   textarea{resize:vertical; min-height:70px;}
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 
-  .chip-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip-grid{display:flex; flex-wrap:wrap; gap:9px;}
   .chip{
-    padding:9px 14px; border-radius:20px; border:1.5px solid var(--line);
-    font-size:13.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:#fff;
-    user-select:none;
+    padding:11px 16px; border-radius:20px; border:1.5px solid var(--line);
+    font-size:14px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:#fff;
+    user-select:none; min-height:24px;
   }
   .chip.on{background:var(--teal); border-color:var(--teal); color:#fff;}
 
   .task-list{display:flex; flex-direction:column; gap:0;}
   .task{
-    display:flex; align-items:center; gap:11px; padding:11px 4px;
-    border-bottom:1px solid var(--line); cursor:pointer;
+    display:flex; align-items:center; gap:12px; padding:13px 4px;
+    border-bottom:1px solid var(--line); cursor:pointer; min-height:44px;
   }
   .task:last-child{border-bottom:none;}
   .box{
-    width:22px; height:22px; border-radius:6px; border:1.8px solid var(--aqua);
-    flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px;
+    width:26px; height:26px; border-radius:7px; border:2px solid var(--aqua);
+    flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px;
   }
   .task.done .box{background:var(--teal); border-color:var(--teal);}
-  .task span{font-size:14.5px;}
+  .task span{font-size:15px;}
   .task.done span{color:var(--ink-soft); text-decoration:line-through;}
 
-  .mat-row{display:grid; grid-template-columns:1fr 70px 30px; gap:8px; margin-bottom:8px; align-items:center;}
-  .mat-row input{padding:9px 10px; font-size:14px;}
-  .rm-btn{width:30px; height:30px; border-radius:8px; border:1.5px solid var(--line); background:#fff; color:var(--danger); font-size:16px; display:flex; align-items:center; justify-content:center;}
-  .add-link{color:var(--teal); font-weight:600; font-size:13.5px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:2px;}
+  .mat-row{display:grid; grid-template-columns:1fr 70px 40px; gap:8px; margin-bottom:9px; align-items:center;}
+  .mat-row input{padding:11px 10px; font-size:15px;}
+  .rm-btn{width:40px; height:40px; border-radius:9px; border:1.5px solid var(--line); background:#fff; color:var(--danger); font-size:18px; display:flex; align-items:center; justify-content:center;}
+  .add-link{color:var(--teal); font-weight:600; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:4px; padding:6px 0;}
 
-  .photo-grid{display:flex; flex-wrap:wrap; gap:8px;}
-  .photo-thumb{width:74px; height:74px; border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--line);}
+  .photo-grid{display:flex; flex-wrap:wrap; gap:10px;}
+  .photo-thumb{width:82px; height:82px; border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--line);}
   .photo-thumb img{width:100%; height:100%; object-fit:cover;}
-  .photo-thumb .del{position:absolute; top:2px; right:2px; background:rgba(0,0,0,.55); color:#fff; width:18px; height:18px; border-radius:50%; font-size:11px; display:flex; align-items:center; justify-content:center;}
-  .photo-add{width:74px; height:74px; border-radius:10px; border:1.8px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--aqua); font-size:24px;}
+  .photo-thumb .del{position:absolute; top:3px; right:3px; background:rgba(10,30,32,.75); color:#fff; width:26px; height:26px; border-radius:50%; font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .photo-add{width:82px; height:82px; border-radius:10px; border:1.8px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--aqua); font-size:26px;}
 
   .bottom-bar{
     position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
     padding:10px 14px calc(10px + env(safe-area-inset-bottom)) 14px; z-index:20;
     display:flex; gap:10px; max-width:720px; margin:0 auto;
   }
-  .btn{flex:1; padding:14px; border-radius:12px; font-family:'Space Grotesk'; font-weight:600; font-size:14.5px; border:none; display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer;}
+  .btn{flex:1; padding:15px 6px; border-radius:12px; font-family:'Space Grotesk'; font-weight:600; font-size:13px; border:none; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer; white-space:nowrap; min-height:48px;}
   .btn-primary{background:var(--teal); color:#fff;}
   .btn-secondary{background:var(--aqua-light); color:var(--teal-deep);}
+  .btn-tertiary{background:var(--paper); color:var(--ink-soft); border:1.5px solid var(--line);}
+  .btn:disabled{opacity:.55; cursor:default;}
 
   .modal-bg{position:fixed; inset:0; background:rgba(10,30,32,.45); z-index:50; display:none; align-items:flex-end; justify-content:center;}
   .modal-bg.show{display:flex;}
@@ -159,8 +161,8 @@
   .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .modal-head h3{margin-bottom:0;}
   .modal-close{
-    width:30px; height:30px; border-radius:50%; background:var(--paper); color:var(--ink-soft);
-    display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;
+    width:38px; height:38px; border-radius:50%; background:var(--paper); color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0;
   }
   .modal h3{font-size:16px;}
   .tech-edit-row{display:flex; gap:8px; margin-bottom:8px;}
@@ -169,7 +171,20 @@
   .toast{position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:10px; font-size:13.5px; z-index:60; opacity:0; transition:opacity .25s;}
   .toast.show{opacity:1;}
 
-  .hist-item{display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .draft-card{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    border-color:var(--amber); background:#FBF3E6; padding:13px 14px; margin-bottom:8px;
+  }
+  .draft-title{font-family:'Space Grotesk'; font-weight:600; font-size:13.5px; color:var(--ink);}
+  .draft-sub{font-size:11.5px; color:#B4791F; margin-top:2px;}
+
+  .hist-item{display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); font-size:13.5px; gap:8px;}
+  .status-pill{display:inline-block; margin-top:5px; padding:2px 8px; border-radius:20px; font-size:10.5px; font-weight:600; font-family:'Space Grotesk';}
+  .icon-btn{
+    width:40px; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--paper);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0;
+  }
+  .icon-btn-danger{color:var(--danger);}
   .hist-item .t{font-weight:600;}
   .hist-item .d{color:var(--ink-soft); font-family:'IBM Plex Mono'; font-size:11.5px;}
   .del-hist{color:var(--danger); font-size:12px;}
@@ -199,13 +214,11 @@
 <main>
 
   <div id="homeScreen">
-    <div class="card" id="draftBanner" style="display:none; border-color:var(--amber); background:#FBF3E6; margin-bottom:16px;">
-      <h2 style="color:#B4791F;">Fiche en cours</h2>
-      <div id="draftBannerText" style="font-size:14px; margin:4px 0 12px 0;"></div>
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-primary" style="flex:1;" onclick="resumeDraft()">Reprendre</button>
-        <button class="btn btn-secondary" style="flex:1;" onclick="discardDraft()">Supprimer</button>
+    <div id="draftsSection" style="display:none; margin-bottom:18px;">
+      <div class="home-title" style="margin-bottom:8px;">
+        <h2 style="font-size:15px; color:#B4791F;">Fiches non terminées</h2>
       </div>
+      <div id="draftsList"></div>
     </div>
     <div class="home-title">
       <h2>Choisir une fiche</h2>
@@ -214,7 +227,8 @@
     <div class="tile-grid" id="tileGrid"></div>
     <div class="card" id="historyCard" style="margin-top:18px;">
       <h2>Fiches enregistrées sur cet iPad</h2>
-      <div id="histList" style="margin-top:6px;"></div>
+      <input type="text" id="historySearch" placeholder="Rechercher un client..." style="display:none; margin-top:10px;" oninput="onHistorySearch(this.value)">
+      <div id="histList" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -308,8 +322,9 @@
 </main>
 
 <div class="bottom-bar" id="bottomBar" style="display:none;">
-  <button class="btn btn-secondary" onclick="generatePDF(false)">📄 Générer le PDF</button>
-  <button class="btn btn-primary" onclick="sendFiche()">✉️ Envoyer par mail</button>
+  <button class="btn btn-tertiary" id="btnSave" onclick="saveFiche()">💾 Enregistrer</button>
+  <button class="btn btn-secondary" id="btnPdf" onclick="generatePDF(false)">📄 Générer PDF</button>
+  <button class="btn btn-primary" id="btnSend" onclick="sendFiche()">✉️ Envoyer mail</button>
 </div>
 
 <div class="modal-bg" id="settingsModal" onclick="if(event.target===this) closeSettings()">
@@ -418,6 +433,8 @@ const TYPE_ICONS = {
 let state = {
   type: "intervention",
   screen: "home",
+  draftId: null,
+  historyId: null,
   checkedTasks: {},
   selectedTechs: [],
   photos: [],
@@ -487,12 +504,9 @@ function renderTiles(){
 }
 
 function selectType(key){
-  const existingDraft = loadDraft();
-  if(existingDraft){
-    if(!window.confirm("Une fiche non terminée existe déjà. Démarrer une nouvelle fiche l'effacera. Continuer ?")) return;
-    clearDraft();
-  }
   state.type = key;
+  state.draftId = null;
+  state.historyId = null;
   resetForm();
   state.screen = 'form';
   showScreen();
@@ -509,10 +523,10 @@ function hasUnsavedData(){
 }
 
 function goHome(){
+  saveDraftNow();
   if(hasUnsavedData()){
-    if(!window.confirm("Cette fiche n'est pas enregistrée. Revenir à l'accueil effacera les données saisies. Continuer ?")) return;
+    showToast('Fiche mise de côté comme brouillon');
   }
-  clearDraft();
   resetForm();
   state.screen = 'home';
   showScreen();
@@ -537,6 +551,8 @@ function showScreen(){
 }
 
 function resetForm(){
+  state.draftId = null;
+  state.historyId = null;
   document.getElementById('clientName').value = '';
   document.getElementById('clientStreet').value = '';
   document.getElementById('clientPostal').value = '';
@@ -695,42 +711,74 @@ function renderPhotos(){
 }
 function removePhoto(i){ state.photos.splice(i,1); renderPhotos(); saveDraft(); }
 
-/* ---------- Brouillon (sauvegarde automatique) ---------- */
+/* ---------- Brouillons (sauvegarde automatique, plusieurs possibles) ---------- */
 
-const DRAFT_KEY = 'fiche_draft';
+const DRAFTS_KEY = 'fiche_drafts';
 let draftSaveTimer = null;
+
+function loadDrafts(){
+  try{ return JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveDrafts(list){
+  try{ localStorage.setItem(DRAFTS_KEY, JSON.stringify(list)); }catch(e){}
+}
+function getDraft(id){
+  return loadDrafts().find(d=>d.id===id) || null;
+}
 
 function saveDraft(){
   clearTimeout(draftSaveTimer);
-  draftSaveTimer = setTimeout(()=>{
-    if(state.screen !== 'form') return;
-    if(!hasUnsavedData()) return;
-    const data = gatherData();
-    data.savedAt = new Date().toISOString();
-    try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); }catch(e){}
-  }, 500);
+  draftSaveTimer = setTimeout(()=> saveDraftNow(), 500);
 }
 
-function loadDraft(){
-  try{ return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); }
-  catch(e){ return null; }
+function saveDraftNow(){
+  if(state.screen !== 'form') return;
+  if(!hasUnsavedData()) return;
+  const data = gatherData();
+  data.savedAt = new Date().toISOString();
+  const list = loadDrafts();
+  if(state.draftId){
+    const idx = list.findIndex(d=>d.id===state.draftId);
+    data.id = state.draftId;
+    if(idx >= 0) list[idx] = data; else list.unshift(data);
+  } else {
+    data.id = 'draft_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    state.draftId = data.id;
+    list.unshift(data);
+  }
+  saveDrafts(list);
 }
 
-function clearDraft(){
-  localStorage.removeItem(DRAFT_KEY);
+function deleteDraft(id){
+  saveDrafts(loadDrafts().filter(d=>d.id!==id));
+  if(state.draftId === id) state.draftId = null;
 }
 
 function renderDraftBanner(){
-  const draft = loadDraft();
-  const banner = document.getElementById('draftBanner');
-  if(!draft){ banner.style.display = 'none'; return; }
-  banner.style.display = 'block';
-  document.getElementById('draftBannerText').textContent =
-    `Fiche ${TYPE_LABELS[draft.type] || ''} — ${draft.client || 'client non renseigné'}, non terminée`;
+  const drafts = loadDrafts();
+  const section = document.getElementById('draftsSection');
+  const wrap = document.getElementById('draftsList');
+  if(drafts.length===0){ wrap.innerHTML=''; section.style.display='none'; return; }
+  section.style.display = 'block';
+  wrap.innerHTML = drafts.map(d=>`
+    <div class="card draft-card">
+      <div class="draft-info">
+        <div class="draft-title">${TYPE_LABELS[d.type] || ''} — ${d.client || 'client non renseigné'}</div>
+        <div class="draft-sub">non terminée</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary" style="padding:9px 14px; flex:none;" onclick="resumeDraft('${d.id}')">Reprendre</button>
+        <button class="btn btn-secondary" style="padding:9px 14px; flex:none;" onclick="discardDraft('${d.id}')">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-function populateFormFrom(data){
+function populateFormFrom(data, draftId, historyId){
   state.type = data.type;
+  state.draftId = draftId || null;
+  state.historyId = historyId || null;
   state.checkedTasks = {};
   (TASKS[data.type] || []).forEach((t,i)=>{
     const found = (data.tasksDoneAll || []).find(x=>x.text===t);
@@ -764,18 +812,18 @@ function populateFormFrom(data){
   renderTechChips();
   renderHivernageType();
   applyDevisUI();
-  saveDraft();
+  saveDraftNow();
 }
 
-function resumeDraft(){
-  const draft = loadDraft();
+function resumeDraft(id){
+  const draft = getDraft(id);
   if(!draft) return;
-  populateFormFrom(draft);
+  populateFormFrom(draft, id);
 }
 
-function discardDraft(){
+function discardDraft(id){
   if(!window.confirm('Supprimer cette fiche non terminée ?')) return;
-  clearDraft();
+  deleteDraft(id);
   renderDraftBanner();
 }
 
@@ -785,8 +833,17 @@ const HISTORY_LIMIT = 25;
 
 
 function loadHistory(){
-  try{ return JSON.parse(localStorage.getItem('fiche_history') || '[]'); }
+  let h;
+  try{ h = JSON.parse(localStorage.getItem('fiche_history') || '[]'); }
   catch(e){ return []; }
+  let migrated = false;
+  h.forEach(e=>{
+    if(!e.id){ e.id = 'hist_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); migrated = true; }
+  });
+  if(migrated){
+    try{ localStorage.setItem('fiche_history', JSON.stringify(h)); }catch(err){}
+  }
+  return h;
 }
 
 async function shrinkForHistory(photos){
@@ -797,12 +854,33 @@ async function shrinkForHistory(photos){
   return out;
 }
 
-async function saveToHistory(data){
+const STATUS_RANK = { saved: 1, pdf: 2, sent: 3 };
+const STATUS_LABELS = {
+  saved: { text: 'Enregistrée', bg: '#EBEEF0', color: 'var(--ink-soft)' },
+  pdf:   { text: 'PDF généré', bg: '#DCEEF0', color: 'var(--teal-deep)' },
+  sent:  { text: 'Envoyée ✓', bg: '#E1F3E8', color: 'var(--ok)' },
+};
+
+async function saveToHistory(data, status){
+  status = status || 'saved';
   const entry = Object.assign({}, data);
   entry.photos = await shrinkForHistory(data.photos);
   entry.savedAt = new Date().toISOString();
   const h = loadHistory();
-  h.unshift(entry);
+
+  if(state.historyId){
+    const idx = h.findIndex(e=>e.id===state.historyId);
+    entry.id = state.historyId;
+    const prevStatus = idx >= 0 ? h[idx].status : null;
+    entry.status = (STATUS_RANK[status] > STATUS_RANK[prevStatus]) ? status : (prevStatus || status);
+    if(idx >= 0){ h[idx] = entry; } else { h.unshift(entry); }
+  } else {
+    entry.id = 'hist_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    entry.status = status;
+    state.historyId = entry.id;
+    h.unshift(entry);
+  }
+
   try{
     localStorage.setItem('fiche_history', JSON.stringify(h.slice(0, HISTORY_LIMIT)));
   }catch(e){
@@ -813,39 +891,67 @@ async function saveToHistory(data){
   renderHistory();
 }
 
-function renderHistory(){
+function bumpHistoryStatus(id, status){
+  if(!id) return;
   const h = loadHistory();
+  const idx = h.findIndex(e=>e.id===id);
+  if(idx < 0) return;
+  if(STATUS_RANK[status] > STATUS_RANK[h[idx].status]){
+    h[idx].status = status;
+    localStorage.setItem('fiche_history', JSON.stringify(h));
+    renderHistory();
+  }
+}
+
+let historySearchQuery = '';
+
+function onHistorySearch(val){
+  historySearchQuery = (val || '').trim().toLowerCase();
+  renderHistory();
+}
+
+function renderHistory(){
+  const all = loadHistory();
+  const h = historySearchQuery
+    ? all.filter(item => (item.client || '').toLowerCase().includes(historySearchQuery))
+    : all;
   const wrap = document.getElementById('histList');
-  if(h.length===0){ wrap.innerHTML = '<div class="mono" style="font-size:12px;color:var(--ink-soft);">aucune fiche enregistrée</div>'; return; }
+  const searchBox = document.getElementById('historySearch');
+  if(searchBox) searchBox.style.display = all.length > 3 ? 'block' : 'none';
+
+  if(all.length===0){ wrap.innerHTML = '<div class="mono" style="font-size:12px;color:var(--ink-soft);">aucune fiche enregistrée</div>'; return; }
+  if(h.length===0){ wrap.innerHTML = '<div class="mono" style="font-size:12px;color:var(--ink-soft);">aucun résultat</div>'; return; }
+
   wrap.innerHTML = '';
-  h.forEach((item, i)=>{
+  h.forEach((item)=>{
     const el = document.createElement('div');
     el.className = 'hist-item';
     const canReview = !!item.tasksDoneAll;
-    el.innerHTML = `<div><div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type] || ''}</div><div class="d">${item.date || ''}</div></div>
-      <div style="display:flex; gap:12px; align-items:center;">
-        ${canReview ? `<span class="add-link" style="margin-top:0;" onclick="reviewHistoryItem(${i})">ouvrir</span>` : ''}
-        <span class="del-hist" onclick="deleteHist(${i})">supprimer</span>
+    const st = STATUS_LABELS[item.status] || STATUS_LABELS.saved;
+    el.innerHTML = `<div>
+        <div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type] || ''}</div>
+        <div class="d">${item.date || ''}</div>
+        <span class="status-pill" style="background:${st.bg}; color:${st.color};">${st.text}</span>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${canReview ? `<button class="icon-btn" title="Ouvrir" onclick="reviewHistoryItem('${item.id}')">✏️</button>` : ''}
+        ${canReview ? `<button class="icon-btn" title="Générer le PDF" onclick="quickGeneratePDF('${item.id}')">📄</button>` : ''}
+        ${canReview ? `<button class="icon-btn" title="Envoyer par mail" onclick="quickSendFiche('${item.id}')">✉️</button>` : ''}
+        <button class="icon-btn icon-btn-danger" title="Supprimer" onclick="deleteHist('${item.id}')">🗑</button>
       </div>`;
     wrap.appendChild(el);
   });
 }
 
-function reviewHistoryItem(i){
-  const h = loadHistory();
-  const item = h[i];
+function reviewHistoryItem(id){
+  const item = loadHistory().find(e=>e.id===id);
   if(!item) return;
-  const existingDraft = loadDraft();
-  if(existingDraft){
-    if(!window.confirm("Une fiche non terminée existe déjà. La rouvrir depuis l'historique l'effacera. Continuer ?")) return;
-  }
-  populateFormFrom(item);
-  showToast('Fiche rouverte — les photos sont en qualité réduite');
+  populateFormFrom(item, null, item.id || null);
+  showToast('Fiche ouverte — les photos sont en qualité réduite');
 }
 
-function deleteHist(i){
-  const h = loadHistory();
-  h.splice(i,1);
+function deleteHist(id){
+  const h = loadHistory().filter(e=>e.id!==id);
   localStorage.setItem('fiche_history', JSON.stringify(h));
   renderHistory();
 }
@@ -1064,63 +1170,80 @@ function buildPDF(data){
 }
 
 function backToHomeAfterSend(){
-  clearDraft();
+  if(state.draftId) deleteDraft(state.draftId);
   resetForm();
   state.screen = 'home';
   showScreen();
 }
 
+let formActionBusy = false;
+
+function lockFormButtons(locked){
+  formActionBusy = locked;
+  ['btnSave','btnPdf','btnSend'].forEach(id=>{
+    const btn = document.getElementById(id);
+    if(btn) btn.disabled = locked;
+  });
+}
+
+async function saveFiche(){
+  if(formActionBusy) return;
+  const data = gatherData();
+  if(!data.client){ showToast("Indique le nom du client avant d'enregistrer"); return; }
+  lockFormButtons(true);
+  await saveToHistory(data, 'saved');
+  showToast('Fiche enregistrée');
+  backToHomeAfterSend();
+  lockFormButtons(false);
+}
+
 async function generatePDF(silent){
   const data = gatherData();
   if(!data.client){ showToast("Indique le nom du client avant de générer le PDF"); return null; }
+  if(!silent){
+    if(formActionBusy) return null;
+    lockFormButtons(true);
+  }
   const doc = buildPDF(data);
   const filename = `Fiche_${data.typeLabel.replace(/\s/g,'')}_${data.client.replace(/\s/g,'_')}_${data.date||''}.pdf`;
   if(!silent){
     doc.save(filename);
-    await saveToHistory(data);
+    await saveToHistory(data, 'pdf');
     showToast('PDF téléchargé');
     backToHomeAfterSend();
+    lockFormButtons(false);
   }
   return {doc, filename, data};
 }
 
 /* ---------- Send by email ---------- */
 
-async function sendFiche(){
-  const result = await generatePDF(true);
-  if(!result) return;
-  const { doc, filename, data } = result;
-
+async function performSend(data){
   if(!settings.companyEmail){
     showToast("Ajoute l'adresse mail de la société dans les réglages ⚙");
     openSettings();
-    return;
+    return false;
   }
 
   const confirmMsg = `Envoyer la fiche ${data.typeLabel} — ${data.client || 'client'} à ${settings.companyEmail} ?`;
-  if(!window.confirm(confirmMsg)) return;
+  if(!window.confirm(confirmMsg)) return false;
 
-  await saveToHistory(data);
-
+  const doc = buildPDF(data);
+  const filename = `Fiche_${(data.typeLabel||'').replace(/\s/g,'')}_${(data.client||'').replace(/\s/g,'_')}_${data.date||''}.pdf`;
   const blob = doc.output('blob');
   const file = new File([blob], filename, {type:'application/pdf'});
-  const summary = `Fiche ${data.typeLabel} — ${data.client}\nDate : ${data.date}\nTechnicien(s) : ${data.techs.join(', ')}\n\nFiche PDF en pièce jointe.`;
+  const summary = `Fiche ${data.typeLabel} — ${data.client}\nDate : ${data.date}\nTechnicien(s) : ${(data.techs||[]).join(', ')}\n\nFiche PDF en pièce jointe.`;
 
   // iOS/iPadOS Safari: Web Share API can hand the PDF straight to Mail (iCloud)
   // via the share sheet, with attachment.
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{
-      await navigator.share({
-        files:[file],
-        title: filename,
-        text: summary
-      });
+      await navigator.share({ files:[file], title: filename, text: summary });
       showToast('Fiche partagée — choisis Mail pour l\'envoyer');
-      backToHomeAfterSend();
-      return;
+      return true;
     }catch(e){
       // user cancelled the share sheet — fall through to mailto backup
-      if(e && e.name === 'AbortError') return;
+      if(e && e.name === 'AbortError') return false;
     }
   }
 
@@ -1131,7 +1254,36 @@ async function sendFiche(){
   const body = encodeURIComponent(summary + '\n\n(PDF téléchargé — pense à le joindre depuis "Fichiers")');
   window.location.href = `mailto:${settings.companyEmail}?subject=${subject}&body=${body}`;
   showToast('PDF téléchargé — joins-le au mail qui s\'ouvre');
+  return true;
+}
+
+async function sendFiche(){
+  if(formActionBusy) return;
+  const data = gatherData();
+  if(!data.client){ showToast("Indique le nom du client avant d'envoyer"); return; }
+  lockFormButtons(true);
+  const sent = await performSend(data);
+  if(!sent){ lockFormButtons(false); return; }
+  await saveToHistory(data, 'sent');
   backToHomeAfterSend();
+  lockFormButtons(false);
+}
+
+async function quickSendFiche(id){
+  const item = loadHistory().find(e=>e.id===id);
+  if(!item) return;
+  const sent = await performSend(item);
+  if(sent) bumpHistoryStatus(item.id, 'sent');
+}
+
+function quickGeneratePDF(id){
+  const item = loadHistory().find(e=>e.id===id);
+  if(!item) return;
+  const doc = buildPDF(item);
+  const filename = `Fiche_${(item.typeLabel||'').replace(/\s/g,'')}_${(item.client||'').replace(/\s/g,'_')}_${item.date||''}.pdf`;
+  doc.save(filename);
+  bumpHistoryStatus(item.id, 'pdf');
+  showToast('PDF téléchargé');
 }
 
 /* ---------- Toast ---------- */
