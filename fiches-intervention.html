@@ -235,7 +235,13 @@
     <div class="tile-grid" id="tileGrid"></div>
     <div class="card" id="historyCard" style="margin-top:18px;">
       <h2>Fiches enregistrées sur cet iPad</h2>
-      <input type="text" id="historySearch" placeholder="Rechercher un client..." style="display:none; margin-top:10px;" oninput="onHistorySearch(this.value)">
+      <div id="historyFilters" style="display:none; gap:8px; margin-top:10px;">
+        <input type="text" id="historySearch" placeholder="Rechercher un client..." style="flex:1;" oninput="onHistorySearch(this.value)">
+        <select id="historyTypeFilter" style="width:auto; flex:none; max-width:130px;" onchange="onHistoryTypeFilter(this.value)">
+          <option value="">Tous types</option>
+        </select>
+      </div>
+      <div id="storageIndicator" style="margin-top:10px;"></div>
       <div id="histList" style="margin-top:10px;"></div>
     </div>
   </div>
@@ -246,7 +252,8 @@
     <h2>Client</h2>
     <div class="field">
       <label>Nom du client</label>
-      <input type="text" id="clientName" placeholder="Nom / société">
+      <input type="text" id="clientName" placeholder="Nom / société" list="clientNameList" autocomplete="off">
+      <datalist id="clientNameList"></datalist>
     </div>
     <div class="field">
       <label>Rue et numéro</label>
@@ -410,7 +417,9 @@ const TASKS = {
     "Caution chlore/pH"
   ],
   sav: [],
-  intervention: []
+  intervention: [],
+  livraison_spa: [],
+  livraison_produits: []
 };
 
 // Décrit la structure réelle de chaque fiche papier :
@@ -422,20 +431,26 @@ const TYPE_CONFIG = {
   hivernage:        { checklist: true,  description: false, materiel: false },
   sav:               { checklist: false, description: true,  materiel: true  },
   intervention:       { checklist: false, description: true,  materiel: true  },
+  livraison_spa:       { checklist: false, description: true,  materiel: true  },
+  livraison_produits:   { checklist: false, description: true,  materiel: true  },
 };
 
 const TYPE_LABELS = {
   mise_en_service: "Mise en service",
   hivernage: "Hivernage",
   sav: "SAV",
-  intervention: "Intervention"
+  intervention: "Intervention",
+  livraison_spa: "Livraison spa",
+  livraison_produits: "Livraison produits"
 };
 
 const TYPE_ICONS = {
   mise_en_service: "🔧",
   hivernage: "❄️",
   sav: "🚨",
-  intervention: "🧹"
+  intervention: "🧹",
+  livraison_spa: "🛁",
+  livraison_produits: "📦"
 };
 
 let state = {
@@ -499,7 +514,7 @@ function saveSettings(){
 
 /* ---------- Navigation home / fiche ---------- */
 
-const DISABLED_TYPES = ['mise_en_service'];
+const DISABLED_TYPES = ['mise_en_service', 'livraison_spa', 'livraison_produits'];
 
 function renderTiles(){
   const wrap = document.getElementById('tileGrid');
@@ -849,6 +864,57 @@ function discardDraft(id){
   renderDraftBanner();
 }
 
+/* ---------- Mémoire clients (autocomplétion) ---------- */
+
+const CLIENTS_KEY = 'fiche_clients';
+const CLIENTS_LIMIT = 200;
+
+function loadClients(){
+  try{ return JSON.parse(localStorage.getItem(CLIENTS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+
+function upsertClient(name, street, postal, city){
+  name = (name || '').trim();
+  if(!name) return;
+  const list = loadClients();
+  const idx = list.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+  const entry = { name, street: street||'', postal: postal||'', city: city||'', lastUsed: Date.now() };
+  if(idx >= 0) list[idx] = entry; else list.push(entry);
+  list.sort((a,b)=> b.lastUsed - a.lastUsed);
+  try{ localStorage.setItem(CLIENTS_KEY, JSON.stringify(list.slice(0, CLIENTS_LIMIT))); }catch(e){}
+  renderClientDatalist();
+}
+
+function findClient(name){
+  name = (name || '').trim().toLowerCase();
+  if(!name) return null;
+  return loadClients().find(c => c.name.toLowerCase() === name) || null;
+}
+
+function renderClientDatalist(){
+  const dl = document.getElementById('clientNameList');
+  if(!dl) return;
+  dl.innerHTML = loadClients().map(c => `<option value="${c.name.replace(/"/g,'&quot;')}"></option>`).join('');
+}
+
+function onClientNameInput(){
+  const nameField = document.getElementById('clientName');
+  const client = findClient(nameField.value);
+  if(!client) return;
+  const streetField = document.getElementById('clientStreet');
+  const postalField = document.getElementById('clientPostal');
+  const cityField = document.getElementById('clientCity');
+  // Ne pas écraser une adresse déjà saisie manuellement
+  if(!streetField.value.trim() && !postalField.value.trim() && !cityField.value.trim()){
+    streetField.value = client.street;
+    postalField.value = client.postal;
+    cityField.value = client.city;
+    showToast('Adresse du client pré-remplie');
+    saveDraft();
+  }
+}
+
 /* ---------- History ---------- */
 
 const HISTORY_LIMIT = 25;
@@ -910,6 +976,7 @@ async function saveToHistory(data, status){
     const lean = h.slice(0, HISTORY_LIMIT).map(e2=>({...e2, photos:[]}));
     try{ localStorage.setItem('fiche_history', JSON.stringify(lean)); }catch(e2){}
   }
+  upsertClient(data.client, data.street, data.postal, data.city);
   renderHistory();
 }
 
@@ -926,20 +993,44 @@ function bumpHistoryStatus(id, status){
 }
 
 let historySearchQuery = '';
+let historyTypeFilterValue = '';
+let typeFilterOptionsBuilt = false;
 
 function onHistorySearch(val){
   historySearchQuery = (val || '').trim().toLowerCase();
   renderHistory();
 }
 
+function onHistoryTypeFilter(val){
+  historyTypeFilterValue = val || '';
+  renderHistory();
+}
+
+function buildTypeFilterOptions(){
+  if(typeFilterOptionsBuilt) return;
+  const sel = document.getElementById('historyTypeFilter');
+  if(!sel) return;
+  Object.keys(TYPE_LABELS).forEach(key=>{
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = TYPE_LABELS[key];
+    sel.appendChild(opt);
+  });
+  typeFilterOptionsBuilt = true;
+}
+
 function renderHistory(){
+  buildTypeFilterOptions();
   const all = loadHistory();
-  const h = historySearchQuery
-    ? all.filter(item => (item.client || '').toLowerCase().includes(historySearchQuery))
-    : all;
+  let h = all;
+  if(historySearchQuery) h = h.filter(item => (item.client || '').toLowerCase().includes(historySearchQuery));
+  if(historyTypeFilterValue) h = h.filter(item => item.type === historyTypeFilterValue);
+
   const wrap = document.getElementById('histList');
-  const searchBox = document.getElementById('historySearch');
-  if(searchBox) searchBox.style.display = all.length > 3 ? 'block' : 'none';
+  const filtersBox = document.getElementById('historyFilters');
+  if(filtersBox) filtersBox.style.display = all.length > 3 ? 'flex' : 'none';
+
+  renderStorageIndicator();
 
   if(all.length===0){ wrap.innerHTML = '<div class="mono" style="font-size:12px;color:var(--ink-soft);">aucune fiche enregistrée</div>'; return; }
   if(h.length===0){ wrap.innerHTML = '<div class="mono" style="font-size:12px;color:var(--ink-soft);">aucun résultat</div>'; return; }
@@ -963,6 +1054,40 @@ function renderHistory(){
       </div>`;
     wrap.appendChild(el);
   });
+}
+
+/* ---------- Indicateur de stockage ---------- */
+
+function getStorageUsageMB(){
+  let bytes = 0;
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    const val = localStorage.getItem(key) || '';
+    bytes += new Blob([key + val]).size;
+  }
+  return bytes / (1024*1024);
+}
+
+function renderStorageIndicator(){
+  const wrap = document.getElementById('storageIndicator');
+  if(!wrap) return;
+  const usedMB = getStorageUsageMB();
+  const capMB = 5; // repère indicatif — la limite réelle varie selon l'appareil
+  const pct = Math.min(100, Math.round((usedMB / capMB) * 100));
+  let barColor = 'var(--ok)';
+  if(pct >= 85) barColor = 'var(--danger)';
+  else if(pct >= 60) barColor = 'var(--amber)';
+
+  wrap.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--ink-soft); margin-bottom:4px;">
+      <span>Stockage utilisé sur cet iPad</span>
+      <span>${usedMB.toFixed(1)} Mo</span>
+    </div>
+    <div style="height:6px; background:var(--line); border-radius:4px; overflow:hidden;">
+      <div style="height:100%; width:${pct}%; background:${barColor};"></div>
+    </div>
+    ${pct >= 80 ? `<div style="font-size:11px; color:var(--danger); margin-top:5px;">Stockage presque plein — pense à supprimer les anciennes fiches de l'historique.</div>` : ''}
+  `;
 }
 
 function reviewHistoryItem(id){
@@ -1345,11 +1470,13 @@ window.addEventListener('DOMContentLoaded', ()=>{
   addMatRow();
   renderPhotos();
   renderHistory();
+  renderClientDatalist();
   showScreen();
 
   const formEl = document.getElementById('formScreen');
   formEl.addEventListener('input', saveDraft);
   formEl.addEventListener('change', saveDraft);
+  document.getElementById('clientName').addEventListener('input', onClientNameInput);
 });
 </script>
 </body>
