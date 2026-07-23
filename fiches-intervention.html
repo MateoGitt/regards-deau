@@ -129,13 +129,27 @@
 
   .mat-row{display:grid; grid-template-columns:1fr 70px 40px; gap:8px; margin-bottom:9px; align-items:center;}
 
-  .deliv-row{display:flex; align-items:center; gap:11px; padding:11px 4px; border-bottom:1px solid var(--line);}
+  .deliv-group-label{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-soft); font-weight:700; margin:16px 0 2px 0; font-family:'Space Grotesk';}
+  .deliv-group-label:first-child{margin-top:0;}
+  .deliv-row{display:flex; align-items:center; gap:11px; padding:10px 6px; border-bottom:1px solid var(--line); border-radius:9px; transition:background .12s;}
   .deliv-row:last-child{border-bottom:none;}
+  .deliv-row.checked{background:var(--aqua-light);}
   .deliv-row .box{cursor:pointer; flex-shrink:0;}
   .deliv-row .deliv-label{flex:1; font-size:14.5px; cursor:pointer;}
-  .deliv-qty{width:68px; flex:none; text-align:center; padding:9px 6px; font-size:14px;}
-  .deliv-qty:disabled{background:var(--paper); color:var(--line); border-color:var(--line);}
   .deliv-other-text{flex:1; min-width:0;}
+  .qty-stepper{display:flex; align-items:center; flex:none; opacity:1;}
+  .qty-stepper.disabled{opacity:.35; pointer-events:none;}
+  .qty-btn{
+    width:32px; height:32px; border:1.5px solid var(--line); background:#fff;
+    font-size:17px; font-weight:700; color:var(--teal); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .qty-btn:first-child{border-radius:8px 0 0 8px; border-right:none;}
+  .qty-btn:last-child{border-radius:0 8px 8px 0; border-left:none;}
+  .qty-val-input{width:38px; height:32px; border:1.5px solid var(--line); text-align:center; padding:0; font-size:14px; border-radius:0;}
+  .deliv-counter{
+    display:inline-block; background:var(--teal); color:#fff; font-size:11px; font-weight:700;
+    font-family:'Space Grotesk'; padding:2px 9px; border-radius:20px; margin-left:8px; vertical-align:middle;
+  }
   .mat-row input{padding:11px 10px; font-size:15px;}
   .rm-btn{width:40px; height:40px; border-radius:9px; border:1.5px solid var(--line); background:#fff; color:var(--danger); font-size:18px; display:flex; align-items:center; justify-content:center;}
   .add-link{color:var(--teal); font-weight:600; font-size:14px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:4px; padding:6px 0;}
@@ -302,12 +316,12 @@
   </div>
 
   <div class="card" id="deliveryCard">
-    <h2>Produits livrés</h2>
+    <h2>Produits livrés<span class="deliv-counter" id="deliveryCounter" style="display:none;">0</span></h2>
     <div id="deliveryList"></div>
   </div>
 
   <div class="card" id="cautionCard">
-    <h2>Cautions reprises (bidons chlore / pH)</h2>
+    <h2>Cautions reprises (bidons chlore / pH)<span class="deliv-counter" id="cautionCounter" style="display:none;">0</span></h2>
     <div id="cautionList"></div>
   </div>
 
@@ -396,34 +410,17 @@ function escapeHtml(str){
   }[c]));
 }
 
-const DELIVERY_PRODUCTS = [
-  "Chlore PPG 20L",
-  "Chlore RDO 20L",
-  "Chlore Brentag 30L",
-  "pH Minus PPG 20L",
-  "pH Minus RDO 20L",
-  "pH Minus Brentag 30L",
-  "Chlorifix 1kg",
-  "Chlorifix 5kg",
-  "Chlorifix 60 1kg",
-  "Chlorifix 60 5kg",
-  "Chlorilong 5kg",
-  "Desalgin 1L",
-  "Desalgin 3L",
-  "Aquachek jaune",
-  "Aquachek Salt",
-  "Sac de sel 25kg"
+const DELIVERY_GROUPS = [
+  { label: "Chlore", items: ["Chlore PPG 20L", "Chlore RDO 20L", "Chlore Brentag 30L"] },
+  { label: "pH Minus", items: ["pH Minus PPG 20L", "pH Minus RDO 20L", "pH Minus Brentag 30L"] },
+  { label: "Chlorifix / Chlorilong", items: ["Chlorifix 1kg", "Chlorifix 5kg", "Chlorifix 60 1kg", "Chlorifix 60 5kg", "Chlorilong 5kg"] },
+  { label: "Désalgin", items: ["Desalgin 1L", "Desalgin 3L"] },
+  { label: "Tests & sel", items: ["Aquachek jaune", "Aquachek Salt", "Sac de sel 25kg"] },
 ];
+const DELIVERY_PRODUCTS = DELIVERY_GROUPS.flatMap(g => g.items);
 
 // Seuls les bidons chlore / pH sont consignés
-const CAUTION_PRODUCTS = [
-  "Chlore PPG 20L",
-  "Chlore RDO 20L",
-  "Chlore Brentag 30L",
-  "pH Minus PPG 20L",
-  "pH Minus RDO 20L",
-  "pH Minus Brentag 30L"
-];
+const CAUTION_PRODUCTS = [...DELIVERY_GROUPS[0].items, ...DELIVERY_GROUPS[1].items];
 
 const TASKS = {
   mise_en_service: [
@@ -759,19 +756,46 @@ function addMatRow(name='', qty=''){
 
 /* ---------- Livraison produits ---------- */
 
+function buildDelivRow(name, entry, onToggle, onQtyChange){
+  const row = document.createElement('div');
+  row.className = 'deliv-row' + (entry.checked ? ' checked' : '');
+  row.innerHTML = `
+    <div class="box"></div>
+    <span class="deliv-label"></span>
+    <div class="qty-stepper${entry.checked ? '' : ' disabled'}">
+      <button type="button" class="qty-btn" data-dir="-1">−</button>
+      <input type="text" class="qty-val-input mono" inputmode="numeric" value="${escapeHtml(entry.qty || '1')}">
+      <button type="button" class="qty-btn" data-dir="1">+</button>
+    </div>
+  `;
+  row.querySelector('.box').textContent = entry.checked ? '✓' : '';
+  if(entry.checked){ row.querySelector('.box').style.background = 'var(--teal)'; row.querySelector('.box').style.borderColor = 'var(--teal)'; }
+  row.querySelector('.deliv-label').textContent = name;
+
+  const check = ()=> onToggle();
+  row.querySelector('.box').onclick = check;
+  row.querySelector('.deliv-label').onclick = check;
+
+  const qtyInput = row.querySelector('.qty-val-input');
+  qtyInput.oninput = ()=> onQtyChange(qtyInput.value);
+  row.querySelectorAll('.qty-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const dir = parseInt(btn.dataset.dir, 10);
+      const cur = parseInt(qtyInput.value, 10) || 0;
+      const next = Math.max(1, cur + dir);
+      qtyInput.value = next;
+      onQtyChange(String(next));
+    };
+  });
+  return row;
+}
+
 function toggleDeliveryProduct(name){
   const cur = state.delivery[name] || { checked:false, qty:'' };
   cur.checked = !cur.checked;
   if(cur.checked && !cur.qty) cur.qty = '1';
   state.delivery[name] = cur;
   renderDeliveryProducts();
-  saveDraft();
-}
-
-function onDeliveryQtyInput(name, val){
-  const cur = state.delivery[name] || { checked:false, qty:'' };
-  cur.qty = val;
-  state.delivery[name] = cur;
   saveDraft();
 }
 
@@ -787,34 +811,65 @@ function renderDeliveryProducts(){
   if(!wrap) return;
   wrap.innerHTML = '';
 
-  DELIVERY_PRODUCTS.forEach(name=>{
-    const entry = state.delivery[name] || { checked:false, qty:'' };
-    const row = document.createElement('div');
-    row.className = 'deliv-row';
-    row.innerHTML = `
-      <div class="box" style="${entry.checked ? 'background:var(--teal);border-color:var(--teal);' : ''}">${entry.checked ? '✓' : ''}</div>
-      <span class="deliv-label">${escapeHtml(name)}</span>
-      <input type="text" class="deliv-qty mono" inputmode="numeric" placeholder="Qté" value="${escapeHtml(entry.qty)}" ${entry.checked ? '' : 'disabled'}>
-    `;
-    row.querySelector('.box').onclick = ()=> toggleDeliveryProduct(name);
-    row.querySelector('.deliv-label').onclick = ()=> toggleDeliveryProduct(name);
-    row.querySelector('.deliv-qty').oninput = (e)=> onDeliveryQtyInput(name, e.target.value);
-    wrap.appendChild(row);
+  DELIVERY_GROUPS.forEach(group=>{
+    const groupLabel = document.createElement('div');
+    groupLabel.className = 'deliv-group-label';
+    groupLabel.textContent = group.label;
+    wrap.appendChild(groupLabel);
+
+    group.items.forEach(name=>{
+      const entry = state.delivery[name] || { checked:false, qty:'' };
+      const row = buildDelivRow(name, entry,
+        ()=> toggleDeliveryProduct(name),
+        (val)=>{
+          const cur = state.delivery[name] || { checked:false, qty:'' };
+          cur.qty = val;
+          state.delivery[name] = cur;
+          saveDraft();
+        }
+      );
+      wrap.appendChild(row);
+    });
   });
 
   // ligne "Autre"
+  const otherLabel = document.createElement('div');
+  otherLabel.className = 'deliv-group-label';
+  otherLabel.textContent = 'Autre';
+  wrap.appendChild(otherLabel);
+
   const other = state.deliveryOther;
   const row = document.createElement('div');
-  row.className = 'deliv-row';
+  row.className = 'deliv-row' + (other.checked ? ' checked' : '');
   row.innerHTML = `
     <div class="box" style="${other.checked ? 'background:var(--teal);border-color:var(--teal);' : ''}">${other.checked ? '✓' : ''}</div>
-    <input type="text" class="deliv-other-text" placeholder="Autre produit..." value="${escapeHtml(other.text)}" ${other.checked ? '' : 'disabled'}>
-    <input type="text" class="deliv-qty mono" inputmode="numeric" placeholder="Qté" value="${escapeHtml(other.qty)}" ${other.checked ? '' : 'disabled'}>
+    <input type="text" class="deliv-other-text" placeholder="Nom du produit..." value="${escapeHtml(other.text)}" ${other.checked ? '' : 'disabled'}>
+    <div class="qty-stepper${other.checked ? '' : ' disabled'}">
+      <button type="button" class="qty-btn" data-dir="-1">−</button>
+      <input type="text" class="qty-val-input mono" inputmode="numeric" value="${escapeHtml(other.qty || '1')}">
+      <button type="button" class="qty-btn" data-dir="1">+</button>
+    </div>
   `;
   row.querySelector('.box').onclick = toggleDeliveryOther;
   row.querySelector('.deliv-other-text').oninput = (e)=>{ state.deliveryOther.text = e.target.value; saveDraft(); };
-  row.querySelector('.deliv-qty').oninput = (e)=>{ state.deliveryOther.qty = e.target.value; saveDraft(); };
+  const otherQtyInput = row.querySelector('.qty-val-input');
+  otherQtyInput.oninput = ()=>{ state.deliveryOther.qty = otherQtyInput.value; saveDraft(); };
+  row.querySelectorAll('.qty-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const dir = parseInt(btn.dataset.dir, 10);
+      const cur = parseInt(otherQtyInput.value, 10) || 0;
+      const next = Math.max(1, cur + dir);
+      otherQtyInput.value = next;
+      state.deliveryOther.qty = String(next);
+      saveDraft();
+    };
+  });
   wrap.appendChild(row);
+
+  const count = Object.values(state.delivery).filter(p=>p.checked).length + (other.checked ? 1 : 0);
+  const counterEl = document.getElementById('deliveryCounter');
+  counterEl.textContent = count;
+  counterEl.style.display = count > 0 ? 'inline-block' : 'none';
 }
 
 function toggleCautionProduct(name){
@@ -832,23 +887,22 @@ function renderCautionProducts(){
   wrap.innerHTML = '';
   CAUTION_PRODUCTS.forEach(name=>{
     const entry = state.caution[name] || { checked:false, qty:'' };
-    const row = document.createElement('div');
-    row.className = 'deliv-row';
-    row.innerHTML = `
-      <div class="box" style="${entry.checked ? 'background:var(--teal);border-color:var(--teal);' : ''}">${entry.checked ? '✓' : ''}</div>
-      <span class="deliv-label">${escapeHtml(name)}</span>
-      <input type="text" class="deliv-qty mono" inputmode="numeric" placeholder="Qté" value="${escapeHtml(entry.qty)}" ${entry.checked ? '' : 'disabled'}>
-    `;
-    row.querySelector('.box').onclick = ()=> toggleCautionProduct(name);
-    row.querySelector('.deliv-label').onclick = ()=> toggleCautionProduct(name);
-    row.querySelector('.deliv-qty').oninput = (e)=>{
-      const cur = state.caution[name] || { checked:false, qty:'' };
-      cur.qty = e.target.value;
-      state.caution[name] = cur;
-      saveDraft();
-    };
+    const row = buildDelivRow(name, entry,
+      ()=> toggleCautionProduct(name),
+      (val)=>{
+        const cur = state.caution[name] || { checked:false, qty:'' };
+        cur.qty = val;
+        state.caution[name] = cur;
+        saveDraft();
+      }
+    );
     wrap.appendChild(row);
   });
+
+  const count = Object.values(state.caution).filter(p=>p.checked).length;
+  const counterEl = document.getElementById('cautionCounter');
+  counterEl.textContent = count;
+  counterEl.style.display = count > 0 ? 'inline-block' : 'none';
 }
 
 /* ---------- Photos ---------- */
