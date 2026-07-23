@@ -30,20 +30,6 @@
   h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0;}
   .mono{font-family:'IBM Plex Mono',monospace;}
 
-  /* waterline divider — the signature motif */
-  .waterline{
-    height:14px;
-    width:100%;
-    background:
-      repeating-linear-gradient(90deg,
-        transparent 0 6px,
-        var(--aqua) 6px 7px,
-        transparent 7px 34px);
-    opacity:.55;
-    margin: 6px 0 18px 0;
-  }
-  .waterline.tight{margin:10px 0;}
-
   header{
     background: linear-gradient(180deg, var(--brand-blue-deep), var(--brand-blue) 85%);
     color:#fff;
@@ -173,7 +159,6 @@
     display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0;
   }
   .modal h3{font-size:16px;}
-  .tech-edit-row{display:flex; gap:8px; margin-bottom:8px;}
   .close-modal{width:100%; margin-top:10px; padding:13px; border-radius:11px; background:var(--teal); color:#fff; border:none; font-weight:600; font-family:'Space Grotesk';}
 
   .toast{position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:10px; font-size:13.5px; z-index:60; opacity:0; transition:opacity .25s;}
@@ -195,7 +180,6 @@
   .icon-btn-danger{color:var(--danger);}
   .hist-item .t{font-weight:600;}
   .hist-item .d{color:var(--ink-soft); font-family:'IBM Plex Mono'; font-size:11.5px;}
-  .del-hist{color:var(--danger); font-size:12px;}
 </style>
 </head>
 <body>
@@ -388,6 +372,12 @@
 <script>
 /* ---------- Config & data ---------- */
 
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+
 const TASKS = {
   mise_en_service: [
     "Contrôle visuel du bassin et des équipements",
@@ -468,7 +458,7 @@ let state = {
 /* ---------- Settings (localStorage) ---------- */
 
 function loadSettings(){
-  return JSON.parse(localStorage.getItem('fiche_settings') || 'null') || {
+  const defaults = {
     companyName: "Regards d'eau",
     companyEmail: "info@regards-deau.be",
     companyAddress: "Rue de Bardanes 4, 7522 Marquain",
@@ -476,6 +466,11 @@ function loadSettings(){
     companyTVA: "BE0835.637.578",
     techs: ["Noël", "Olivier", "Aymeric"]
   };
+  try{
+    return JSON.parse(localStorage.getItem('fiche_settings') || 'null') || defaults;
+  }catch(e){
+    return defaults;
+  }
 }
 let settings = loadSettings();
 
@@ -503,14 +498,17 @@ function saveSettings(){
   settings.companyPhone = document.getElementById('setCompanyPhone').value.trim();
   settings.companyTVA = document.getElementById('setCompanyTVA').value.trim();
   settings.techs = document.getElementById('setTechs').value.split("\n").map(s=>s.trim()).filter(Boolean);
-  localStorage.setItem('fiche_settings', JSON.stringify(settings));
+  try{
+    localStorage.setItem('fiche_settings', JSON.stringify(settings));
+  }catch(e){
+    showToast("Erreur : stockage plein, réglages non sauvegardés");
+    return;
+  }
   document.getElementById('settingsModal').classList.remove('show');
   refreshHeader();
   renderTechChips();
   showToast("Réglages enregistrés");
 }
-
-/* ---------- Type tabs ---------- */
 
 /* ---------- Navigation home / fiche ---------- */
 
@@ -692,8 +690,8 @@ function addMatRow(name='', qty=''){
   const row = document.createElement('div');
   row.className = 'mat-row';
   row.innerHTML = `
-    <input type="text" placeholder="Désignation (ex: pastilles chlore)" value="${name}">
-    <input type="text" placeholder="Qté" class="mono" value="${qty}">
+    <input type="text" placeholder="Désignation (ex: pastilles chlore)" value="${escapeHtml(name)}">
+    <input type="text" placeholder="Qté" class="mono" value="${escapeHtml(qty)}">
     <div class="rm-btn" onclick="this.parentElement.remove(); saveDraft();">✕</div>`;
   wrap.appendChild(row);
 }
@@ -800,7 +798,7 @@ function renderDraftBanner(){
   wrap.innerHTML = drafts.map(d=>`
     <div class="card draft-card">
       <div class="draft-info">
-        <div class="draft-title">${TYPE_LABELS[d.type] || ''} — ${d.client || 'client non renseigné'}</div>
+        <div class="draft-title">${escapeHtml(TYPE_LABELS[d.type] || '')} — ${escapeHtml(d.client || 'client non renseigné')}</div>
         <div class="draft-sub">non terminée</div>
       </div>
       <div style="display:flex; gap:8px;">
@@ -846,8 +844,6 @@ function populateFormFrom(data, draftId, historyId){
   }
 
   renderPhotos();
-  renderTechChips();
-  renderHivernageType();
   applyDevisUI();
   saveDraftNow();
 }
@@ -895,7 +891,7 @@ function findClient(name){
 function renderClientDatalist(){
   const dl = document.getElementById('clientNameList');
   if(!dl) return;
-  dl.innerHTML = loadClients().map(c => `<option value="${c.name.replace(/"/g,'&quot;')}"></option>`).join('');
+  dl.innerHTML = loadClients().map(c => `<option value="${escapeHtml(c.name)}"></option>`).join('');
 }
 
 function onClientNameInput(){
@@ -918,7 +914,6 @@ function onClientNameInput(){
 /* ---------- History ---------- */
 
 const HISTORY_LIMIT = 25;
-
 
 function loadHistory(){
   let h;
@@ -960,7 +955,8 @@ async function saveToHistory(data, status){
     const idx = h.findIndex(e=>e.id===state.historyId);
     entry.id = state.historyId;
     const prevStatus = idx >= 0 ? h[idx].status : null;
-    entry.status = (STATUS_RANK[status] > STATUS_RANK[prevStatus]) ? status : (prevStatus || status);
+    const prevRank = STATUS_RANK[prevStatus] || 0;
+    entry.status = (STATUS_RANK[status] > prevRank) ? status : (prevStatus || status);
     if(idx >= 0){ h[idx] = entry; } else { h.unshift(entry); }
   } else {
     entry.id = 'hist_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
@@ -985,9 +981,10 @@ function bumpHistoryStatus(id, status){
   const h = loadHistory();
   const idx = h.findIndex(e=>e.id===id);
   if(idx < 0) return;
-  if(STATUS_RANK[status] > STATUS_RANK[h[idx].status]){
+  const prevRank = STATUS_RANK[h[idx].status] || 0;
+  if(STATUS_RANK[status] > prevRank){
     h[idx].status = status;
-    localStorage.setItem('fiche_history', JSON.stringify(h));
+    try{ localStorage.setItem('fiche_history', JSON.stringify(h)); }catch(e){}
     renderHistory();
   }
 }
@@ -1042,7 +1039,7 @@ function renderHistory(){
     const canReview = !!item.tasksDoneAll;
     const st = STATUS_LABELS[item.status] || STATUS_LABELS.saved;
     el.innerHTML = `<div>
-        <div class="t">${item.client || 'Client'} — ${TYPE_LABELS[item.type] || ''}</div>
+        <div class="t">${escapeHtml(item.client || 'Client')} — ${escapeHtml(TYPE_LABELS[item.type] || '')}</div>
         <div class="d">${item.date || ''}</div>
         <span class="status-pill" style="background:${st.bg}; color:${st.color};">${st.text}</span>
       </div>
@@ -1099,7 +1096,7 @@ function reviewHistoryItem(id){
 
 function deleteHist(id){
   const h = loadHistory().filter(e=>e.id!==id);
-  localStorage.setItem('fiche_history', JSON.stringify(h));
+  try{ localStorage.setItem('fiche_history', JSON.stringify(h)); }catch(e){}
   renderHistory();
 }
 
@@ -1209,8 +1206,12 @@ function buildPDF(data){
   }
   function line(txt){
     const split = doc.splitTextToSize(txt, pageW - margin*2);
-    doc.text(split, margin, y);
-    y += split.length*5 + 2;
+    split.forEach(ln=>{
+      if(y > pageH - 14){ doc.addPage(); y = 18; }
+      doc.text(ln, margin, y);
+      y += 5;
+    });
+    y += 2;
   }
   function checkPage(needed=20){
     if(y > pageH - needed){ doc.addPage(); y = 18; return true; }
@@ -1457,11 +1458,6 @@ function showToast(msg){
 }
 
 /* ---------- Init ---------- */
-
-function render(){
-  renderTasks();
-  renderHivernageType();
-}
 
 window.addEventListener('DOMContentLoaded', ()=>{
   refreshHeader();
