@@ -136,7 +136,6 @@
   .deliv-row.checked{background:var(--aqua-light);}
   .deliv-row .box{cursor:pointer; flex-shrink:0;}
   .deliv-row .deliv-label{flex:1; font-size:14.5px; cursor:pointer;}
-  .deliv-other-text{flex:1; min-width:0;}
   .qty-stepper{display:flex; align-items:center; flex:none; opacity:1;}
   .qty-stepper.disabled{opacity:.35; pointer-events:none;}
   .qty-btn{
@@ -318,6 +317,9 @@
   <div class="card" id="deliveryCard">
     <h2>Produits livrés<span class="deliv-counter" id="deliveryCounter" style="display:none;">0</span></h2>
     <div id="deliveryList"></div>
+    <div class="deliv-group-label">Autre</div>
+    <div id="deliveryOtherList"></div>
+    <div class="add-link" onclick="addDeliveryOtherRow()">+ ajouter une ligne</div>
   </div>
 
   <div class="card" id="cautionCard">
@@ -498,7 +500,6 @@ let state = {
   hivernageType: "",
   devisNeeded: false,
   delivery: {},      // { "Chlore PPG 20L": { checked:true, qty:"2" }, ... }
-  deliveryOther: { checked:false, text:"", qty:"" },
   caution: {},        // même structure que delivery, limité aux bidons chlore/pH
 };
 
@@ -590,8 +591,9 @@ function hasUnsavedData(){
   const desc = document.getElementById('description').value.trim();
   const remarks = document.getElementById('remarks').value.trim();
   const anyTask = Object.values(state.checkedTasks).some(Boolean);
-  const anyMat = Array.from(document.querySelectorAll('.mat-row input')).some(i=>i.value.trim());
-  const anyDelivery = Object.values(state.delivery).some(p=>p.checked) || state.deliveryOther.checked;
+  const anyMat = Array.from(document.querySelectorAll('#matList .mat-row input')).some(i=>i.value.trim());
+  const anyDeliveryOther = Array.from(document.querySelectorAll('#deliveryOtherList .mat-row input')).some(i=>i.value.trim());
+  const anyDelivery = Object.values(state.delivery).some(p=>p.checked) || anyDeliveryOther;
   const anyCaution = Object.values(state.caution).some(p=>p.checked);
   return !!(client || street || city || desc || remarks || anyTask || anyMat || anyDelivery || anyCaution || state.selectedTechs.length || state.photos.length);
 }
@@ -658,7 +660,7 @@ function resetForm(){
   state.hivernageType = '';
   state.devisNeeded = false;
   state.delivery = {};
-  state.deliveryOther = { checked:false, text:'', qty:'' };
+  document.getElementById('deliveryOtherList').innerHTML = '';
   state.caution = {};
   renderPhotos();
   const box = document.getElementById('devisBox');
@@ -799,13 +801,6 @@ function toggleDeliveryProduct(name){
   saveDraft();
 }
 
-function toggleDeliveryOther(){
-  state.deliveryOther.checked = !state.deliveryOther.checked;
-  if(state.deliveryOther.checked && !state.deliveryOther.qty) state.deliveryOther.qty = '1';
-  renderDeliveryProducts();
-  saveDraft();
-}
-
 function renderDeliveryProducts(){
   const wrap = document.getElementById('deliveryList');
   if(!wrap) return;
@@ -832,41 +827,30 @@ function renderDeliveryProducts(){
     });
   });
 
-  // ligne "Autre"
-  const otherLabel = document.createElement('div');
-  otherLabel.className = 'deliv-group-label';
-  otherLabel.textContent = 'Autre';
-  wrap.appendChild(otherLabel);
+  updateDeliveryCounter();
+}
 
-  const other = state.deliveryOther;
+function addDeliveryOtherRow(text='', qty=''){
+  const wrap = document.getElementById('deliveryOtherList');
   const row = document.createElement('div');
-  row.className = 'deliv-row' + (other.checked ? ' checked' : '');
+  row.className = 'mat-row';
   row.innerHTML = `
-    <div class="box" style="${other.checked ? 'background:var(--teal);border-color:var(--teal);' : ''}">${other.checked ? '✓' : ''}</div>
-    <input type="text" class="deliv-other-text" placeholder="Nom du produit..." value="${escapeHtml(other.text)}" ${other.checked ? '' : 'disabled'}>
-    <div class="qty-stepper${other.checked ? '' : ' disabled'}">
-      <button type="button" class="qty-btn" data-dir="-1">−</button>
-      <input type="text" class="qty-val-input mono" inputmode="numeric" value="${escapeHtml(other.qty || '1')}">
-      <button type="button" class="qty-btn" data-dir="1">+</button>
-    </div>
-  `;
-  row.querySelector('.box').onclick = toggleDeliveryOther;
-  row.querySelector('.deliv-other-text').oninput = (e)=>{ state.deliveryOther.text = e.target.value; saveDraft(); };
-  const otherQtyInput = row.querySelector('.qty-val-input');
-  otherQtyInput.oninput = ()=>{ state.deliveryOther.qty = otherQtyInput.value; saveDraft(); };
-  row.querySelectorAll('.qty-btn').forEach(btn=>{
-    btn.onclick = ()=>{
-      const dir = parseInt(btn.dataset.dir, 10);
-      const cur = parseInt(otherQtyInput.value, 10) || 0;
-      const next = Math.max(1, cur + dir);
-      otherQtyInput.value = next;
-      state.deliveryOther.qty = String(next);
-      saveDraft();
-    };
-  });
+    <input type="text" placeholder="Nom du produit...">
+    <input type="text" placeholder="Qté" class="mono">
+    <div class="rm-btn">✕</div>`;
+  const inputs = row.querySelectorAll('input');
+  inputs[0].value = text;
+  inputs[1].value = qty;
+  inputs.forEach(inp => inp.oninput = ()=>{ saveDraft(); updateDeliveryCounter(); });
+  row.querySelector('.rm-btn').onclick = ()=>{ row.remove(); saveDraft(); updateDeliveryCounter(); };
   wrap.appendChild(row);
+}
 
-  const count = Object.values(state.delivery).filter(p=>p.checked).length + (other.checked ? 1 : 0);
+function updateDeliveryCounter(){
+  const productCount = Object.values(state.delivery).filter(p=>p.checked).length;
+  const otherCount = Array.from(document.querySelectorAll('#deliveryOtherList .mat-row input:first-child'))
+    .filter(i=>i.value.trim()).length;
+  const count = productCount + otherCount;
   const counterEl = document.getElementById('deliveryCounter');
   counterEl.textContent = count;
   counterEl.style.display = count > 0 ? 'inline-block' : 'none';
@@ -1032,7 +1016,6 @@ function populateFormFrom(data, draftId, historyId){
   state.hivernageType = data.hivernageType || '';
   state.devisNeeded = !!data.devisNeeded;
   state.delivery = data.delivery || {};
-  state.deliveryOther = data.deliveryOther || { checked:false, text:'', qty:'' };
   state.caution = data.caution || {};
 
   state.screen = 'form';
@@ -1054,6 +1037,17 @@ function populateFormFrom(data, draftId, historyId){
   } else {
     addMatRow();
   }
+
+  document.getElementById('deliveryOtherList').innerHTML = '';
+  let otherRows = [];
+  if(Array.isArray(data.deliveryOther)){
+    otherRows = data.deliveryOther;
+  } else if(data.deliveryOther && data.deliveryOther.checked && data.deliveryOther.text){
+    // compatibilité avec l'ancien format (une seule ligne "Autre")
+    otherRows = [{ text: data.deliveryOther.text, qty: data.deliveryOther.qty }];
+  }
+  otherRows.forEach(o => addDeliveryOtherRow(o.text, o.qty));
+  updateDeliveryCounter();
 
   renderPhotos();
   applyDevisUI();
@@ -1325,10 +1319,15 @@ function formatDuration(){
 /* ---------- Gather form data ---------- */
 
 function gatherData(){
-  const mats = Array.from(document.querySelectorAll('.mat-row')).map(row=>{
+  const mats = Array.from(document.querySelectorAll('#matList .mat-row')).map(row=>{
     const inputs = row.querySelectorAll('input');
     return {name: inputs[0].value.trim(), qty: inputs[1].value.trim()};
   }).filter(m=>m.name);
+
+  const deliveryOther = Array.from(document.querySelectorAll('#deliveryOtherList .mat-row')).map(row=>{
+    const inputs = row.querySelectorAll('input');
+    return {text: inputs[0].value.trim(), qty: inputs[1].value.trim()};
+  }).filter(o=>o.text);
 
   const tasksDoneAll = TASKS[state.type].map((t,i)=>({text:t, checked: !!state.checkedTasks[i]}));
 
@@ -1350,7 +1349,7 @@ function gatherData(){
     remarks: document.getElementById('remarks').value.trim(),
     hivernageType: state.hivernageType,
     delivery: JSON.parse(JSON.stringify(state.delivery)),
-    deliveryOther: JSON.parse(JSON.stringify(state.deliveryOther)),
+    deliveryOther,
     caution: JSON.parse(JSON.stringify(state.caution)),
     devisNeeded: state.devisNeeded,
     devisDetail: document.getElementById('devisDetail').value.trim(),
@@ -1496,7 +1495,10 @@ function buildPDF(data){
     const deliveredList = Object.keys(data.delivery || {})
       .filter(name => data.delivery[name].checked)
       .map(name => ({ name, qty: data.delivery[name].qty }));
-    if(data.deliveryOther && data.deliveryOther.checked && data.deliveryOther.text){
+    if(Array.isArray(data.deliveryOther)){
+      data.deliveryOther.forEach(o=>{ if(o.text) deliveredList.push({ name: o.text, qty: o.qty }); });
+    } else if(data.deliveryOther && data.deliveryOther.checked && data.deliveryOther.text){
+      // compatibilité avec l'ancien format (une seule ligne "Autre")
       deliveredList.push({ name: data.deliveryOther.text, qty: data.deliveryOther.qty });
     }
     checkPage();
