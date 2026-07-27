@@ -2,6 +2,16 @@
    config.js — Constantes, clés de stockage, données initiales
    ============================================================ */
 
+/* hashPwd défini ici en premier car utilisé dans DEFAULTS_USERS */
+function hashPwd(p) {
+  var h = 0;
+  for (var i = 0; i < p.length; i++) {
+    h = ((h << 5) - h) + p.charCodeAt(i);
+    h |= 0;
+  }
+  return 'h' + Math.abs(h).toString(36);
+}
+
 var CFG = {
   SK:      'rd_stock_v2',      // Clé données principales
   UK:      'rd_users_v2',      // Clé utilisateurs

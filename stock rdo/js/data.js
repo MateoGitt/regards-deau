@@ -58,16 +58,6 @@ function initData() {
 }
 
 /* ── UTILITAIRES ────────────────────────────────────────── */
-function hashPwd(p) {
-  // Hash simple (non cryptographique) pour le stockage local
-  var h = 0;
-  for (var i = 0; i < p.length; i++) {
-    h = ((h << 5) - h) + p.charCodeAt(i);
-    h |= 0;
-  }
-  return 'h' + Math.abs(h).toString(36);
-}
-
 function fc(n) {
   return Number(n || 0).toLocaleString('fr-FR');
 }
