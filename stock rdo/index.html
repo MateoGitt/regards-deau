@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Regards d'eau — Gestion de stock</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN
+     ══════════════════════════════════════════════════════════ -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:linear-gradient(160deg,#1E3A5F 0%,#2563EB 55%,#4BA3C3 100%)">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.14);padding:36px 40px;width:380px;max-width:95vw">
+
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px">
+      <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" style="width:46px;height:46px;flex-shrink:0">
+        <circle cx="22" cy="22" r="20" fill="none" stroke="#9CA3AF" stroke-width="3.5"/>
+        <clipPath id="lc"><rect x="2" y="22" width="40" height="20"/></clipPath>
+        <circle cx="22" cy="22" r="18" fill="#4BA3C3" clip-path="url(#lc)"/>
+      </svg>
+      <div>
+        <div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:2px">Piscines &amp; Wellness</div>
+        <div style="font-size:21px;font-weight:800;color:#1E3A5F;letter-spacing:-.4px">Regards d'eau</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:1px">Gestion de stock</div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:#E5E7EB;margin-bottom:22px"></div>
+
+    <!-- Erreur -->
+    <div id="login-error" style="display:none;background:#FEF2F2;color:#DC2626;border-left:3px solid #DC2626;padding:9px 12px;border-radius:6px;font-size:13px;margin-bottom:14px"></div>
+
+    <!-- Champs -->
+    <div style="margin-bottom:13px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">Identifiant</label>
+      <input type="text" id="login-user" placeholder="Votre identifiant" autocomplete="username"
+        style="width:100%;padding:10px 13px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:14px;font-family:inherit;outline:none"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+    </div>
+    <div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px">Mot de passe</label>
+        <button type="button" onclick="togglePwd()" style="background:none;border:none;color:#4BA3C3;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;padding:0">
+          Afficher
+        </button>
+      </div>
+      <input type="password" id="login-pass" placeholder="Votre mot de passe" autocomplete="current-password"
+        style="width:100%;padding:10px 13px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:14px;font-family:inherit;outline:none"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <!-- Bouton connexion -->
+    <button onclick="doLogin()" style="width:100%;padding:11px;background:#4BA3C3;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:14px">
+      Se connecter
+    </button>
+
+    <!-- Créer un compte -->
+    <div style="text-align:center;margin-bottom:8px">
+      <button onclick="toggleRegister()" style="background:none;border:none;color:#4BA3C3;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+        Creer un compte
+      </button>
+    </div>
+
+    <!-- Formulaire création de compte -->
+    <div id="register-form" style="display:none;border-top:1px solid #E5E7EB;padding-top:16px;margin-top:4px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:#1E3A5F">Nouveau compte</div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Nom complet</label>
+        <input type="text" id="reg-full" placeholder="Prenom Nom" style="width:100%;padding:9px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Identifiant</label>
+        <input type="text" id="reg-user" placeholder="Ex: thomas" style="width:100%;padding:9px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Mot de passe</label>
+        <input type="password" id="reg-pass" placeholder="Min. 6 caracteres" style="width:100%;padding:9px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:13px;font-family:inherit;outline:none">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Role</label>
+        <select id="reg-role" style="width:100%;padding:9px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none">
+          <option value="admin">Administrateur</option>
+          <option value="magasinier">Magasinier</option>
+          <option value="technicien">Technicien</option>
+        </select>
+      </div>
+      <button onclick="doRegister()" style="width:100%;padding:10px;background:#1E3A5F;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:6px">
+        Creer le compte
+      </button>
+      <div id="reg-error" style="color:#DC2626;font-size:12px;display:none;margin-top:6px"></div>
+      <button onclick="toggleRegister()" style="background:none;border:none;color:#6B7280;font-size:12px;cursor:pointer;font-family:inherit;width:100%;margin-top:4px">
+        Retour
+      </button>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:20px">Regards d'eau &copy; 2026 — Acces securise</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     APPLICATION
+     ══════════════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <div class="sb-overlay" onclick="closeSb()"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sb-logo">
+      <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="3.5"/>
+        <clipPath id="sc"><rect x="2" y="22" width="40" height="20"/></clipPath>
+        <circle cx="22" cy="22" r="18" fill="#4BA3C3" clip-path="url(#sc)"/>
+      </svg>
+      <div><div class="sb-logo-text">Regards d'eau</div><div class="sb-logo-sub">Gestion de stock</div></div>
+    </div>
+    <div class="sb-user" id="sb-user"></div>
+    <nav id="sb-nav">
+      <div class="nav-sec">Principal</div>
+      <div class="ni active" id="nav-dash" onclick="showPage('dash')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Tableau de bord</span>
+      </div>
+      <div class="ni" id="nav-prod" onclick="showPage('prod')">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <span>Produits</span>
+      </div>
+      <div class="ni" id="nav-mvt" onclick="showPage('mvt')">
+        <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        <span>Mouvements</span>
+      </div>
+      <div class="nav-sec">Gestion</div>
+      <div class="ni" id="nav-cats" onclick="showPage('cats')">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        <span>Categories</span>
+      </div>
+      <div class="ni" id="nav-sups" onclick="showPage('sups')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Fournisseurs</span>
+      </div>
+      <div class="nav-sec">Analyse</div>
+      <div class="ni" id="nav-alr" onclick="showPage('alr')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span>Alertes</span>
+        <span class="ni-badge" id="alrcnt" style="display:none">0</span>
+      </div>
+      <div class="ni" id="nav-stats" onclick="showPage('stats')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Statistiques</span>
+      </div>
+      <div class="ni" id="nav-hist" onclick="showPage('hist')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Historique</span>
+      </div>
+      <div class="nav-sec">Configuration</div>
+      <div class="ni" id="nav-users" onclick="showPage('users')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <span>Utilisateurs</span>
+      </div>
+      <div class="ni" id="nav-bak" onclick="showPage('bak')">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span>Sauvegardes</span>
+      </div>
+    </nav>
+    <div class="sb-bottom">
+      <div class="ni logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Deconnexion</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main">
+    <header id="topbar">
+      <button class="tb-btn" id="menu-btn" onclick="toggleSb()" style="display:none">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div id="ptitle">Tableau de bord</div>
+      <div class="tb-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Rechercher un produit..." id="gsearch" oninput="globalSearch(this.value)">
+      </div>
+      <div id="topbar-actions"></div>
+      <span id="savest"></span>
+      <button class="tb-btn" onclick="toggleDark()" title="Mode sombre">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </header>
+
+    <div id="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="pg active" id="pg-dash">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:20px;font-weight:800;letter-spacing:-.4px">Tableau de bord</div>
+            <div style="font-size:13px;color:var(--mut);margin-top:3px" id="ddate"></div>
+          </div>
+        </div>
+        <div id="bbanner"></div>
+        <div class="metrics" id="metrics"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>A reapprovisionner</div></div>
+            <div id="drestock"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>Derniers mouvements</div></div>
+            <div id="dmvt"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Stock par categorie</div></div>
+          <div class="card-body" id="dash-cats"></div>
+        </div>
+      </div>
+
+      <!-- ── PRODUITS ── -->
+      <div class="pg" id="pg-prod">
+        <div class="filters">
+          <div class="search-f">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="Nom, SKU, fournisseur..." id="prod-srch" oninput="renderProd()">
+          </div>
+          <select id="prod-cat" onchange="renderProd()"><option value="">Toutes categories</option></select>
+          <select id="prod-sup" onchange="renderProd()"><option value="">Tous fournisseurs</option></select>
+          <select id="prod-status" onchange="renderProd()">
+            <option value="">Tous statuts</option>
+            <option value="ok">OK</option>
+            <option value="low">Stock bas</option>
+            <option value="out">Rupture</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="tw">
+            <table>
+              <thead><tr><th>SKU</th><th>Produit</th><th>Categorie</th><th>Fournisseur(s)</th><th>Stock</th><th>Seuil</th><th>Statut</th><th></th></tr></thead>
+              <tbody id="prod-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MOUVEMENTS ── -->
+      <div class="pg" id="pg-mvt">
+        <div class="mvt-form">
+          <div style="font-size:14px;font-weight:700;margin-bottom:14px">Enregistrer un mouvement</div>
+          <div class="mvt-tabs">
+            <button class="mvt-tab on" id="mvt-in"  onclick="setMvtType('in')">Entree</button>
+            <button class="mvt-tab out" id="mvt-out" onclick="setMvtType('out')">Sortie</button>
+            <button class="mvt-tab adj" id="mvt-adj" onclick="setMvtType('adj')">Ajustement</button>
+          </div>
+          <div class="fg3">
+            <div class="fgr"><label>Produit *</label><select id="mvt-prod"><option value="">-- Choisir --</option></select></div>
+            <div class="fgr"><label>Quantite *</label><input type="number" id="mvt-qty" min="0.01" step="0.01" placeholder="Ex: 5"></div>
+            <div class="fgr"><label>Reference</label><input type="text" id="mvt-ref" placeholder="Ex: BL-2025-001"></div>
+          </div>
+          <div id="mvt-dest-field" style="display:none">
+            <div class="fgr"><label>Destination (chantier / client)</label><input type="text" id="mvt-dest" placeholder="Ex: Chantier Dupont — Tournai"></div>
+          </div>
+          <div class="fgr"><label>Note</label><input type="text" id="mvt-note" placeholder="Observations..."></div>
+          <button class="btn bp" onclick="saveMvt()">Enregistrer le mouvement</button>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Historique recent (50 derniers)</div></div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Date</th><th>Produit</th><th>Type</th><th>Qte</th><th>Stock apres</th><th>Destination</th><th>Reference</th><th>Note</th><th>Operateur</th></tr></thead>
+              <tbody id="mvt-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CATEGORIES ── -->
+      <div class="pg" id="pg-cats">
+        <div id="cats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:13px"></div>
+      </div>
+
+      <!-- ── FOURNISSEURS ── -->
+      <div class="pg" id="pg-sups">
+        <div class="sup-grid" id="sups-grid"></div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Liste complete</div></div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Nom</th><th>Contact</th><th>Telephone</th><th>Email</th><th>Notes</th><th></th></tr></thead>
+              <tbody id="sups-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALERTES ── -->
+      <div class="pg" id="pg-alr">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div class="card" style="padding:16px;text-align:center" id="alr-out-count"></div>
+          <div class="card" style="padding:16px;text-align:center" id="alr-low-count"></div>
+        </div>
+        <div id="alr-list"></div>
+      </div>
+
+      <!-- ── STATISTIQUES ── -->
+      <div class="pg" id="pg-stats">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+          <select id="stats-period" onchange="renderStats()" style="padding:7px 11px;border:1px solid var(--bor);border-radius:var(--r);font-size:13px;background:var(--sur);color:var(--txt);font-family:inherit;outline:none">
+            <option value="7d">7 derniers jours</option>
+            <option value="30d" selected>30 derniers jours</option>
+            <option value="90d">3 derniers mois</option>
+            <option value="all">Depuis le debut</option>
+          </select>
+          <span id="stats-period-label" style="font-size:12px;color:var(--mut)"></span>
+        </div>
+        <div class="metrics" id="stats-kpis"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-hd"><div class="card-title">Detail par categorie</div></div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Categorie</th><th>Produits</th><th>Unites en stock</th><th>Sorties (periode)</th></tr></thead>
+              <tbody id="stats-cat-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HISTORIQUE ── -->
+      <div class="pg" id="pg-hist">
+        <div class="filters">
+          <div class="search-f">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="Produit, reference, destination..." id="hist-srch" oninput="renderHist()">
+          </div>
+          <select id="hist-type" onchange="renderHist()" style="padding:7px 11px;border:1px solid var(--bor);border-radius:var(--r);font-size:13px;background:var(--sur);color:var(--txt);font-family:inherit">
+            <option value="">Tous types</option><option value="in">Entrees</option><option value="out">Sorties</option><option value="adj">Ajustements</option>
+          </select>
+          <input type="date" id="hist-from" onchange="renderHist()" style="padding:7px;border:1px solid var(--bor);border-radius:var(--r);font-size:13px;background:var(--sur);color:var(--txt)">
+          <input type="date" id="hist-to"   onchange="renderHist()" style="padding:7px;border:1px solid var(--bor);border-radius:var(--r);font-size:13px;background:var(--sur);color:var(--txt)">
+        </div>
+        <div class="card">
+          <div class="tw">
+            <table>
+              <thead><tr><th>Date / Heure</th><th>Produit</th><th>SKU</th><th>Type</th><th>Qte</th><th>Stock apres</th><th>Destination</th><th>Reference</th><th>Operateur</th></tr></thead>
+              <tbody id="hist-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UTILISATEURS ── -->
+      <div class="pg" id="pg-users">
+        <div id="users-list"></div>
+      </div>
+
+      <!-- ── SAUVEGARDES ── -->
+      <div class="pg" id="pg-bak">
+        <div id="bbanner2"></div>
+        <div class="bak-section">
+          <h3>Sauvegarder les donnees</h3>
+          <p>Exportez toutes vos donnees dans un fichier JSON. Conservez ce fichier en lieu sur pour pouvoir restaurer votre stock en cas de probleme.</p>
+          <button class="btn bna" onclick="dlBackup()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Telecharger la sauvegarde
+          </button>
+        </div>
+        <div class="bak-section">
+          <h3>Restaurer une sauvegarde</h3>
+          <p>Chargez un fichier JSON precedemment sauvegarde. Attention : vos donnees actuelles seront remplacees.</p>
+          <label class="btn">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Charger un fichier JSON
+            <input type="file" accept=".json" style="display:none" onchange="restoreBackup(this)">
+          </label>
+        </div>
+        <div class="bak-section">
+          <h3>Historique des sauvegardes</h3>
+          <div id="baklog"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════════════════════
+     MODALS
+     ══════════════════════════════════════════════════════════ -->
+
+<!-- Modal Produit -->
+<div class="mo" id="mo-prod"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-title" id="mo-prod-title">Produit</div><button class="mo-x" onclick="closeMo('mo-prod')">&#x2715;</button></div>
+  <div class="mo-body">
+    <div class="fg2">
+      <div class="fgr" style="grid-column:1/-1"><label>Nom du produit *</label><input type="text" id="fp-name" placeholder="Ex: Pompe Hayward 1.5cv"></div>
+      <div class="fgr"><label>SKU / Reference *</label><input type="text" id="fp-sku" placeholder="Ex: PMP-001"></div>
+      <div class="fgr"><label>Categorie</label><select id="fp-cat"></select></div>
+      <div class="fgr"><label>Sous-categorie</label><input type="text" id="fp-sub" placeholder="Ex: Pompes"></div>
+      <div class="fgr"><label>Quantite en stock</label><input type="number" id="fp-qty" min="0" step="1" placeholder="0"></div>
+      <div class="fgr"><label>Seuil d'alerte</label><input type="number" id="fp-thr" min="0" step="1" placeholder="0"></div>
+      <div class="fgr"><label>Emplacement</label><input type="text" id="fp-loc" placeholder="Ex: Zone A - Etagere 2"></div>
+      <div class="fgr"><label>Statut</label>
+        <select id="fp-stk"><option value="actif">Actif</option><option value="surcommande">Sur commande</option><option value="discontinue">Discontinue</option></select>
+      </div>
+      <div class="fgr" style="grid-column:1/-1"><label>Fournisseur(s)</label><div id="fp-sups"></div></div>
+      <div class="fgr" style="grid-column:1/-1"><label>Notes</label><textarea id="fp-notes" placeholder="Informations complementaires..."></textarea></div>
+    </div>
+  </div>
+  <div class="mo-ft">
+    <button class="btn bds" id="fp-del" style="margin-right:auto;display:none" onclick="delProd()">Supprimer</button>
+    <button class="btn" onclick="closeMo('mo-prod')">Annuler</button>
+    <button class="btn bp" onclick="saveProd()">Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- Modal Categorie -->
+<div class="mo" id="mo-cat"><div class="mo-box sm">
+  <div class="mo-hd"><div class="mo-title" id="mo-cat-title">Categorie</div><button class="mo-x" onclick="closeMo('mo-cat')">&#x2715;</button></div>
+  <div class="mo-body">
+    <div class="fgr"><label>Nom *</label><input type="text" id="fc-name" placeholder="Ex: Equipements piscine"></div>
+    <div class="fgr"><label>Couleur</label><input type="color" id="fc-color" value="#4BA3C3"></div>
+    <div class="fgr"><label>Sous-categories (une par ligne)</label><textarea id="fc-subs" placeholder="Pompes&#10;Filtres&#10;Traitement eau"></textarea></div>
+  </div>
+  <div class="mo-ft">
+    <button class="btn bds" id="fc-del" style="margin-right:auto;display:none" onclick="delCat()">Supprimer</button>
+    <button class="btn" onclick="closeMo('mo-cat')">Annuler</button>
+    <button class="btn bp" onclick="saveCat()">Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- Modal Fournisseur -->
+<div class="mo" id="mo-sup"><div class="mo-box sm">
+  <div class="mo-hd"><div class="mo-title" id="mo-sup-title">Fournisseur</div><button class="mo-x" onclick="closeMo('mo-sup')">&#x2715;</button></div>
+  <div class="mo-body">
+    <div class="fgr"><label>Nom *</label><input type="text" id="fs-name" placeholder="Ex: Hayward"></div>
+    <div class="fgr"><label>Contact</label><input type="text" id="fs-contact" placeholder="Nom du contact"></div>
+    <div class="fgr"><label>Telephone</label><input type="tel" id="fs-phone" placeholder="Ex: 04 12 34 56 78"></div>
+    <div class="fgr"><label>Email</label><input type="email" id="fs-email" placeholder="contact@fournisseur.com"></div>
+    <div class="fgr"><label>Site web</label><input type="text" id="fs-web" placeholder="www.exemple.com"></div>
+    <div class="fgr"><label>Notes</label><textarea id="fs-notes" placeholder="Delai livraison, conditions..."></textarea></div>
+  </div>
+  <div class="mo-ft">
+    <button class="btn bds" id="fs-del" style="margin-right:auto;display:none" onclick="delSup()">Supprimer</button>
+    <button class="btn" onclick="closeMo('mo-sup')">Annuler</button>
+    <button class="btn bp" onclick="saveSup()">Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- Modal Utilisateur -->
+<div class="mo" id="mo-user"><div class="mo-box sm">
+  <div class="mo-hd"><div class="mo-title" id="mo-user-title">Utilisateur</div><button class="mo-x" onclick="closeMo('mo-user')">&#x2715;</button></div>
+  <div class="mo-body">
+    <div class="fgr"><label>Nom complet *</label><input type="text" id="fu-full" placeholder="Prenom Nom"></div>
+    <div class="fgr"><label>Identifiant *</label><input type="text" id="fu-name" placeholder="Ex: thomas"></div>
+    <div class="fgr"><label>Mot de passe</label><input type="password" id="fu-pass" placeholder="Laisser vide = inchange"></div>
+    <div class="fgr"><label>Role</label>
+      <select id="fu-role"><option value="admin">Administrateur</option><option value="magasinier">Magasinier</option><option value="technicien">Technicien</option></select>
+    </div>
+  </div>
+  <div class="mo-ft">
+    <button class="btn bds" id="fu-del" style="margin-right:auto;display:none" onclick="delUser()">Supprimer</button>
+    <button class="btn" onclick="closeMo('mo-user')">Annuler</button>
+    <button class="btn bp" onclick="saveUser()">Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- Modal Import CSV -->
+<div class="mo" id="mo-import"><div class="mo-box sm">
+  <div class="mo-hd"><div class="mo-title">Importer un CSV</div><button class="mo-x" onclick="closeMo('mo-import')">&#x2715;</button></div>
+  <div class="mo-body">
+    <p style="font-size:13px;color:var(--mut);margin-bottom:14px;line-height:1.6">Le fichier CSV doit avoir les colonnes : <strong>SKU ; Nom ; Categorie ; Sous-categorie ; Stock ; Seuil ; Fournisseur ; Statut</strong><br>Separateur : point-virgule ( ; )</p>
+    <label class="btn bp" style="width:100%;justify-content:center">
+      Choisir un fichier CSV
+      <input type="file" accept=".csv" style="display:none" onchange="doImportCSV(this)">
+    </label>
+  </div>
+</div></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPTS (ordre important)
+     ══════════════════════════════════════════════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/products.js"></script>
+<script src="js/movements.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
